@@ -1,7 +1,5 @@
 #include "types.h"
-
-#include "idt.c"
-#include "isr.c"
+#include "idt.h"
 
 // uint8 *video_memory;
 
@@ -71,6 +69,7 @@
 //     }
 // }
 // }
+
 
 void main()
 {
