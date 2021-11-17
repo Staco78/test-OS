@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "*.gyp": "json",
+        "types.h": "c",
+        "idt.h": "c",
+        "isr.h": "c",
+        "asm.h": "c",
+        "terminal.h": "c"
+    }
+}
