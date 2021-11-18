@@ -8,9 +8,24 @@ static uint8 *memory_address;
 uint8 cursorX = 0;
 uint8 cursorY = 0;
 
+void _printChar(uint8 c)
+{
+    memory_address[(cursorY * SCREEN_WIDTH + cursorX) * 2] = c;
+}
+
 void terminalInit()
 {
     memory_address = (uint8 *)0xB8000;
+    clear();
+}
+
+void clear()
+{
+    for (uint16 i = 0; i < SCREEN_HEIGHT * SCREEN_WIDTH; i++)
+    {
+        memory_address[i * 2] = 0;
+        memory_address[i * 2 + 1] = 0x02;
+    }
 }
 
 void scrollLine()
@@ -23,6 +38,11 @@ void scrollLine()
     }
 }
 
+uint8 getChar()
+{
+    return memory_address[(cursorY * SCREEN_WIDTH + cursorX) * 2];
+}
+
 void printChar(uint8 c)
 {
 
@@ -31,10 +51,43 @@ void printChar(uint8 c)
         cursorX = 0;
         cursorY++;
     }
+    else if (c == '\b')
+    {
+        if (cursorX == 0 && cursorY == 0)
+        {
+            return;
+        }
+        if (cursorX > 0)
+        {
+            cursorX--;
+            _printChar(0);
+        }
+        else if (memory_address[(cursorY * SCREEN_WIDTH - 1) * 2] != 0)
+        {
+            memory_address[(cursorY * SCREEN_WIDTH - 1) * 2] = 0;
+            cursorY--;
+            cursorX = SCREEN_WIDTH - 1;
+        }
+        else
+        {
+            cursorY--;
+            cursorX = SCREEN_WIDTH - 1;
+
+            while (getChar() == 0)
+            {
+                if (cursorX == 0)
+                {
+                    cursorX = -1;
+                    break;
+                }
+                cursorX--;
+            }
+            cursorX++;
+        }
+    }
     else
     {
-        memory_address[(cursorY * SCREEN_WIDTH + cursorX) * 2] = c;
-        memory_address[(cursorY * SCREEN_WIDTH + cursorX) * 2 + 1] = 0x02;
+        _printChar(c);
         cursorX++;
     }
 
