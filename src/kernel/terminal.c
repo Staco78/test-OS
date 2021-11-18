@@ -19,23 +19,32 @@ void terminalInit()
     clear();
 }
 
+void clearLine(uint8 line)
+{
+    for (uint8 i = 0; i < SCREEN_WIDTH; i++)
+    {
+        memory_address[(line * SCREEN_WIDTH + i) * 2] = 0;
+        memory_address[(line * SCREEN_WIDTH + i) * 2 + 1] = 0x02;
+    }
+}
+
 void clear()
 {
-    for (uint16 i = 0; i < SCREEN_HEIGHT * SCREEN_WIDTH; i++)
+    for (uint8 i = 0; i < SCREEN_HEIGHT; i++)
     {
-        memory_address[i * 2] = 0;
-        memory_address[i * 2 + 1] = 0x02;
+        clearLine(i);
     }
 }
 
 void scrollLine()
 {
     cursorY--;
-    for (uint16 i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT; i++)
+    for (uint16 i = 0; i < (SCREEN_WIDTH - 1) * SCREEN_HEIGHT * 2; i++)
     {
-        memory_address[i * 2] = memory_address[(i + SCREEN_WIDTH) * 2];
-        memory_address[i * 2 + 1] = memory_address[(i + SCREEN_WIDTH) * 2 + 1];
+        memory_address[i] = memory_address[(i + SCREEN_WIDTH * 2)];
     }
+
+    clearLine(SCREEN_HEIGHT - 1);
 }
 
 uint8 getChar()
