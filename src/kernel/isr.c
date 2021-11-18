@@ -44,16 +44,27 @@ void keyboard_interrupt()
             0, /* F12 Key */
             0, /* All other keys are undefined */
         };
+
     write_port(0x20, 0x20);
 
     uint8 status = read_port(0x64);
 
     if (status & 0x01)
     {
+        // printInt(status);
         uint8 keycode = read_port(0x60);
-        if (keycode <= 128)
+        if (keycode > 0 && keycode <= 128)
         {
-            printChar(keyboard_map[keycode]);
+            uint8 key = keyboard_map[keycode];
+
+            if (key == 0)
+            {
+                printInt(keycode);
+            }
+            else
+            {
+                printChar(key);
+            }
         }
     }
 

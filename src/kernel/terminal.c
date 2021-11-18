@@ -9,11 +9,13 @@ void printChar(uint8 c)
 {
     uint8 *ptr = (uint8 *)0xB8000;
     ptr[index++ * 2] = c;
+    if (index > SCREEN_HEIGHT * SCREEN_WIDTH)
+        index = 0;
 }
 
-void printInt(uint32 n)
+void printInt(uint32 x)
 {
-
+    uint32 n = x;
     uint8 i = 0;
     uint8 str[16];
 
@@ -36,3 +38,15 @@ void printInt(uint32 n)
         }
     }
 }
+
+// void print(uint8 *str)
+// {
+//     uint8 i = 0;
+//     // while (str[i] != 0)
+//     // {
+//     //     printInt(i);
+//     //     // printChar(str[i]);
+//     //     i++;
+//     // }
+//     printInt(i);
+// }

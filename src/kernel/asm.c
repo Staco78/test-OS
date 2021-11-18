@@ -2,7 +2,7 @@
 
 void write_port(uint8 port, uint8 value)
 {
-    __asm__("outb %%al,%%dx" ::"a"(value), "d"(port));
+    __asm__ volatile("outb %%al,%%dx" ::"a"(value), "d"(port));
 }
 
 uint8 read_port(uint8 port)

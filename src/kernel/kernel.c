@@ -1,5 +1,7 @@
 #include "types.h"
 #include "idt.h"
+#include "terminal.h"
+#include "asm.h"
 
 // uint8 *video_memory;
 
@@ -70,10 +72,19 @@
 // }
 // }
 
-
 void main()
 {
+
     idt_assemble();
+
+    while (1)
+    {
+        /* code */
+    }
+
+    // idt_assemble();
+    // uint8 x[] = {'s', 'a', 'l', 'u', 't', 0};
+    // print(x);
 
     // uint8 *ptr = (uint8 *)0xB8000;
     // char str[] = "salut";
