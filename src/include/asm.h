@@ -1,5 +1,5 @@
 #pragma once
 #include "types.h"
 
-void write_port(uint8, uint8);
-uint8 read_port(uint8);
+void write_port(uint16, uint16);
+uint16 read_port(uint16);

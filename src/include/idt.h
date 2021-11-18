@@ -1,5 +1,6 @@
 #pragma once
 #include "types.h"
+#include "asm.h"
 
 #define IDT_MAX_DESCRIPTORS 256
 #define IDT_CPU_EXCEPTION_COUNT 32

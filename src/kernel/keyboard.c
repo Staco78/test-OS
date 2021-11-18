@@ -1,6 +1,4 @@
-#include "types.h"
-#include "terminal.h"
-#include "asm.h"
+#include "keyboard.h"
 
 void keyboard_interrupt()
 {
