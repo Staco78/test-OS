@@ -9,7 +9,7 @@ KERNEL_C_SRCS=$(wildcard src/kernel/*.c)
 KERNEL_ASM_SRCS=$(wildcard src/kernel/*.asm)
 KERNEL_OBJS=$(KERNEL_C_SRCS:.c=.o) $(KERNEL_ASM_SRCS:.asm=.o)
 
-all: clean dir run
+all: clean dir run clean_after
 
 dir:
 	mkdir build
@@ -45,4 +45,7 @@ run: build/os-image.bin
 
 clean:
 	$(RM) -r build
+	$(RM) -f ./**/**/*.o
+
+clean_after:
 	$(RM) -f ./**/**/*.o
