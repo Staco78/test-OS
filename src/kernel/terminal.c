@@ -3,7 +3,7 @@
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 
-static uint8 *memory_address;
+uint8 *memory_address;
 
 uint8 cursorX = 0;
 uint8 cursorY = 0;
