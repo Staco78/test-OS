@@ -4,7 +4,9 @@
 
 void terminalInit();
 void clear();
-void makeCaps(uint8 active);
 void printChar(uint8 c);
 void printInt(uint32 n);
+void printHex(uint32 n);
+void printBin(uint8 n);
 void print(uint8 *str);
+void printLn();

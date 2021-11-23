@@ -110,7 +110,7 @@ void keyboard_interrupt()
 
             if (key == 0)
             {
-                printInt(keycode);
+                // printInt(keycode);
             }
             else
             {

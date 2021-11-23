@@ -141,6 +141,65 @@ void printInt(uint32 n)
     }
 }
 
+void printLn()
+{
+    printChar('\n');
+}
+
+void printHex(uint32 n)
+{
+    uint8 i = 0;
+    uint8 str[16];
+
+    for (uint8 i = 0; i < 16; i++)
+        str[i] = 0;
+
+    do
+    {
+        uint8 r = n % 16;
+        n = n / 16;
+        if (r > 9)
+        {
+            str[i] = 55 + r;
+        }
+        else
+            str[i] = 48 + r;
+        i++;
+    } while (n > 0);
+
+    for (uint8 i = 0; i < 16; i++)
+    {
+        if (str[15 - i] != 0)
+        {
+            printChar(str[15 - i]);
+        }
+    }
+}
+
+void printBin(uint8 n)
+{
+    uint8 i = 0;
+    uint8 str[8];
+
+    for (i = 0; i < 8; i++)
+        str[i] = 0;
+
+    i = 0;
+
+    do
+    {
+        uint8 r = n % 2;
+        n = n / 2;
+        str[i] = 48 + r;
+        i++;
+    } while (i < 8);
+
+    for (i = 0; i < 8; i++)
+    {
+        printChar(str[7 - i]);
+    }
+}
+
 void print(uint8 *str)
 {
     uint8 i = 0;

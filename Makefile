@@ -41,8 +41,7 @@ build/os-image.bin: build/boot.bin build/kernel.bin
 	cat $^ > $@
 
 run: build/os-image.bin
-	qemu-system-i386 -fda $<
-
+	qemu-system-i386 -drive format=raw,file=$<,index=0,if=floppy -boot a -hda hd_oldlinux.img
 clean:
 	$(RM) -r build
 	$(RM) -f ./**/**/*.o
