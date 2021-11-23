@@ -1,7 +1,6 @@
 #include "idt.h"
 
 extern void keyboard_interrupt(void);
-extern void hd_interrupt(void);
 
 static
     __attribute__((aligned(0x1000)))
@@ -32,7 +31,6 @@ void idt_assemble()
     }
 
     idt_set_descriptor(0x21, (uint32)keyboard_interrupt, 0x8E);
-    idt_set_descriptor(0x2e, (uint32)hd_interrupt, 0xE8);
 
     write_port(0x20, 0x11);
     write_port(0xA0, 0x11);

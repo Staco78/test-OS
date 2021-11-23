@@ -146,13 +146,34 @@ void printLn()
     printChar('\n');
 }
 
+void print8bitHex(uint8 n)
+{
+    uint8 i = 0;
+    uint8 str[2] = {0};
+
+    while (i < 2)
+    {
+        uint8 r = n % 16;
+        n = n / 16;
+        if (r > 9)
+        {
+            str[i] = 55 + r;
+        }
+        else
+            str[i] = 48 + r;
+        i++;
+    }
+
+    for (i = 0; i < 2; i++)
+    {
+        printChar(str[1 - i]);
+    }
+}
+
 void printHex(uint32 n)
 {
     uint8 i = 0;
-    uint8 str[16];
-
-    for (uint8 i = 0; i < 16; i++)
-        str[i] = 0;
+    uint8 str[16] = {0};
 
     do
     {
