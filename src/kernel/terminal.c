@@ -170,10 +170,40 @@ void print8bitHex(uint8 n)
     }
 }
 
+void print32Hex(uint32 n)
+{
+    for (uint8 i = 0; i < 4; i++)
+    {
+        print8bitHex((uint8)(n >> (i * 8)));
+    }
+}
+
+void printCustomHex(uint32 *data)
+{
+    print32Hex(*(data + 4));
+    print32Hex(*data);
+    printChar(' ');
+
+    data += 8;
+
+    print32Hex(*(data + 4));
+    print32Hex(*data);
+    printChar(' ');
+
+    data += 8;
+
+    print32Hex(*data);
+    printChar(' ');
+    data += 4;
+    print32Hex(*data);
+}
+
 void printHex(uint32 n)
 {
     uint8 i = 0;
-    uint8 str[16] = {0};
+    uint8 str[16] = {
+        0,
+    };
 
     do
     {

@@ -9,3 +9,4 @@ ata3: enabled=0
 ata0-master: type=disk, path="hd_oldlinux.img", mode=flat, cylinders=1024, heads=4, spt=20, translation=none
 boot: a
 mouse: enabled=0 
+magic_break: enabled=1
