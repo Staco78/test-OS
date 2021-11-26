@@ -201,28 +201,26 @@ void printCustomHex(uint32 *data)
 void printHex(uint32 n)
 {
     uint8 i = 0;
-    uint8 str[16] = {
+    uint8 str[8] = {
         0,
     };
 
-    do
+    while (i < 8)
     {
         uint8 r = n % 16;
         n = n / 16;
         if (r > 9)
-        {
             str[i] = 55 + r;
-        }
         else
             str[i] = 48 + r;
         i++;
-    } while (n > 0);
+    }
 
-    for (uint8 i = 0; i < 16; i++)
+    for (uint8 i = 0; i < 8; i++)
     {
-        if (str[15 - i] != 0)
+        if (str[7 - i] != 0)
         {
-            printChar(str[15 - i]);
+            printChar(str[7 - i]);
         }
     }
 }

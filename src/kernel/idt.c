@@ -1,4 +1,5 @@
 #include "idt.h"
+#include "terminal.h"
 
 extern void keyboard_interrupt(void);
 
@@ -27,10 +28,17 @@ void idt_assemble()
 
     for (uint8 vector = 0; vector < IDT_CPU_EXCEPTION_COUNT; vector++)
     {
-        idt_set_descriptor(vector, (uint32)keyboard_interrupt, 0x8E);
+        idt_set_descriptor(vector, (uint32)&keyboard_interrupt, 0x8E);
     }
 
-    idt_set_descriptor(0x21, (uint32)keyboard_interrupt, 0x8E);
+    idt_set_descriptor(0x21, (uint32)&keyboard_interrupt, 0x8E);
+
+    print("idtp base: ");
+    printHex(idtp.base);
+    printLn();
+    print("idtp limit: ");
+    printHex(idtp.limit);
+    printLn();
 
     write_port(0x20, 0x11);
     write_port(0xA0, 0x11);
