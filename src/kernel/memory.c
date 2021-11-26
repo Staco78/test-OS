@@ -1,5 +1,4 @@
 #include "memory.h"
-#include "terminal.h"
 
 struct memory_map
 {
@@ -10,7 +9,7 @@ struct memory_map
 
 struct memory_map memory_maps[6];
 
-__attribute__((aligned(8192))) uint32 pages_stack[1024 * 1024];
+__attribute__((aligned(8192))) void *pages_stack[1024 * 1024];
 
 uint32 stack_index = -1;
 
@@ -19,17 +18,17 @@ void push_stack(uint32 address)
     stack_index++;
     if (stack_index >= 1024 * 1024)
     {
-        print("Memory stack overflow");
+        panic("Memory stack overflow");
         return;
     }
-    pages_stack[stack_index] = address;
+    pages_stack[stack_index] = (void *)address;
 }
 
-uint32 pop_stack()
+void *pop_stack()
 {
     if (stack_index == 0)
     {
-        print("Pop stack error");
+        panic("Out of memory");
         return 0;
     }
     stack_index--;
@@ -43,7 +42,6 @@ void initStack()
 
 void memory_init()
 {
-
     initStack();
 
     uint8 *ptr = (uint8 *)0x8000;
@@ -59,21 +57,24 @@ void memory_init()
         if (memory_maps[i].type == 1)
         {
             uint16 n = memory_maps[i].length / 4096;
-            print("n: ");
-            printInt(n);
-            printLn();
             for (uint16 i = 0; i < n; i++)
             {
                 push_stack((memory_maps[i].address + 4096 * i));
             }
         }
     }
-    // printInt(memory_maps[3].length / 4096);
-    // push_stack((uint8 *)(memory_maps[3].address + 4096 * 32480));
-    print("stack[0]: ");
-    printHex((uint32)&pages_stack[0]);
-    printLn();
-    print("stack[stack_index]: ");
-    printHex((uint32)&pages_stack[stack_index]);
-    printLn();
+}
+
+// return pointer to a 4096 bytes page
+void *kmalloc()
+{
+    return pop_stack();
+}
+
+// mark page from address at free
+void kfree(void *address)
+{
+    if ((uint32)address % 4096 != 0)
+        panic("Unable to free page: invalid address");
+    push_stack((uint32)address);
 }

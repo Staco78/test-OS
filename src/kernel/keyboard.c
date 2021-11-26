@@ -90,7 +90,6 @@ void keyboard_interrupt()
 
     if (status & 0x01)
     {
-        // printInt(status);
         uint8 keycode = read_port(0x60);
         if (keycode == 42 || keycode == 54)
         {
@@ -108,11 +107,7 @@ void keyboard_interrupt()
             else
                 key = caps_map[keycode];
 
-            if (key == 0)
-            {
-                // printInt(keycode);
-            }
-            else
+            if (key != 0)
             {
                 printChar(key);
             }

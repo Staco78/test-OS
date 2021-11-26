@@ -10,11 +10,9 @@ void main()
 {
     terminalInit();
     idt_assemble();
+
     memory_init();
 
-    print("keyboard interrupt address: ");
-    printHex((uint32)&keyboard_interrupt);
-    printLn();
-
+    kfree(kmalloc());
     // fs_start();
 }

@@ -32,14 +32,7 @@ void idt_assemble()
     }
 
     idt_set_descriptor(0x21, (uint32)&keyboard_interrupt, 0x8E);
-
-    print("idtp base: ");
-    printHex(idtp.base);
-    printLn();
-    print("idtp limit: ");
-    printHex(idtp.limit);
-    printLn();
-
+    
     write_port(0x20, 0x11);
     write_port(0xA0, 0x11);
 
