@@ -1,10 +1,6 @@
-#include "memory.h"
-#include "idt.h"
-#include "asm.h"
 #include "terminal.h"
-#include "keyboard.h"
-
-void fs_start();
+#include "idt.h"
+#include "memory.h"
 
 void main()
 {

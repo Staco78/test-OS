@@ -59,9 +59,9 @@ void memory_init()
         if (memory_maps[i].type == 1)
         {
             uint16 n = memory_maps[i].length / 4096;
-            for (uint16 i = 0; i < n; i++)
+            for (uint16 y = 0; y < n; y++)
             {
-                push_stack((memory_maps[i].address + 4096 * i));
+                push_stack((memory_maps[i].address + 4096 * y));
             }
         }
     }
