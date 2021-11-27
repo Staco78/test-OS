@@ -5,7 +5,7 @@
 # First rule is the one executed when no parameters are fed to the Makefile
 
 
-KERNEL_C_SRCS=$(wildcard src/kernel/*.c)
+KERNEL_C_SRCS=$(wildcard src/kernel/*.c) $(wildcard src/kernel/**/*.c)
 KERNEL_ASM_SRCS=$(wildcard src/kernel/*.asm)
 KERNEL_OBJS=$(KERNEL_C_SRCS:.c=.o) $(KERNEL_ASM_SRCS:.asm=.o)
 
@@ -45,6 +45,8 @@ run: build/os-image.bin
 clean:
 	$(RM) -r build
 	$(RM) -f ./**/**/*.o
+	$(RM) -f ./**/**/**/*.o
 
 clean_after:
 	$(RM) -f ./**/**/*.o
+	$(RM) -f ./**/**/**/*.o

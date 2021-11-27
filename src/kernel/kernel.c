@@ -12,7 +12,4 @@ void main()
     idt_assemble();
 
     memory_init();
-
-    kfree(kmalloc());
-    // fs_start();
 }

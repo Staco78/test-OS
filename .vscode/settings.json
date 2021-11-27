@@ -3,7 +3,9 @@
         "*.gyp": "json",
         "memory.h": "c",
         "keyboard.h": "c",
-        "terminal.h": "c"
+        "terminal.h": "c",
+        "exceptions.h": "c",
+        "idt.h": "c"
     },
     "C_Cpp.default.systemIncludePath": [
         "src/include"

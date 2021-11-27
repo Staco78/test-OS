@@ -40,6 +40,8 @@ void initStack()
     stack_index = 0;
 }
 
+void pages_init();
+
 void memory_init()
 {
     initStack();
@@ -63,6 +65,8 @@ void memory_init()
             }
         }
     }
+
+    pages_init();
 }
 
 // return pointer to a 4096 bytes page
