@@ -46,8 +46,8 @@ void idt_assemble()
     idt_set_descriptor(11, (uint32)_11);
     idt_set_descriptor(12, (uint32)_12);
     idt_set_descriptor(13, (uint32)_13);
+    idt_set_descriptor(14, (uint32)_14);
 
-    idt_set_descriptor(14, (uint32)exception_handler);
     idt_set_descriptor(15, (uint32)exception_handler);
     idt_set_descriptor(16, (uint32)exception_handler);
     idt_set_descriptor(17, (uint32)exception_handler);

@@ -58,3 +58,40 @@ void _13()
 {
     panic("General Protection Fault");
 }
+void _14(uint32 e)
+{
+    uint32 address;
+    __asm__ volatile("mov %%cr2, %0"
+                     : "=r"(address));
+
+    int present = !(e & 0x1); // Page not present
+    int rw = e & 0x2;         // Write operation?
+    int us = e & 0x4;         // Processor was in user-mode?
+    int reserved = e & 0x8;   // Overwritten CPU-reserved bits of page entry?
+    int id = e & 0x10;        // Caused by an instruction fetch?
+
+    // Output an error message.
+    print("Page fault! ( ");
+    if (present)
+    {
+        if (rw)
+        {
+            print("read-only ");
+        }
+        if (us)
+        {
+            print("user-mode ");
+        }
+        if (reserved)
+        {
+            print("reserved ");
+        }
+    }
+    else
+        print("not present ");
+
+    print(") at 0x");
+    printHex(address);
+    print("\n");
+    panic("Page fault");
+}

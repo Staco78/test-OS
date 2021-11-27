@@ -29,10 +29,8 @@ void pages_init()
         *(page768 + i) = (0x1000 + 4096 * i) | 3;
     }
 
-
-
-    // __asm__ volatile("mov %0, %%cr3" ::"r"(page_directory));
-    // __asm__ volatile("mov %%cr0, %%eax\n\r"
-    //                  "or $0x80000000, %%eax\n\r"
-    //                  "mov %%eax, %%cr0" ::);
+    __asm__ volatile("mov %0, %%cr3" ::"r"(page_directory));
+    __asm__ volatile("mov %%cr0, %%eax\n\r"
+                     "or $0x80000000, %%eax\n\r"
+                     "mov %%eax, %%cr0" ::);
 }

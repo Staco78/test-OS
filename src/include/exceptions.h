@@ -14,3 +14,4 @@ void _10();
 void _11();
 void _12();
 void _13();
+void _14(uint32 e);
