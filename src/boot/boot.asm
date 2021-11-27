@@ -11,10 +11,18 @@ mov [BOOT_DRIVE], dl
 mov bp, 0x9000
 mov sp, bp
 
+; clear screen
 mov ah, 0x00
 mov al, 0x03
 int 10h
 
+
+; active A20 gate
+in al, 0x92
+or al, 2
+out 0x92, al
+
+; memory detection
 call do_e820
 
 call load_kernel

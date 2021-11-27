@@ -11,7 +11,7 @@ struct memory_map memory_maps[6];
 
 __attribute__((aligned(8192))) void *pages_stack[1024 * 1024];
 
-uint32 stack_index = -1;
+uint32 stack_index;
 
 void push_stack(uint32 address)
 {
@@ -31,13 +31,12 @@ void *pop_stack()
         panic("Out of memory");
         return 0;
     }
-    stack_index--;
-    return pages_stack[stack_index + 1];
+    return pages_stack[stack_index--];
 }
 
 void initStack()
 {
-    stack_index = 0;
+    stack_index = -1;
 }
 
 void pages_init();

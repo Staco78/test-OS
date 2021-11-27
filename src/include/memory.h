@@ -3,7 +3,6 @@
 #include "terminal.h"
 #include "panic.h"
 
-
 void memory_init();
 void *kmalloc();
-void kfree(void* address);
+void kfree(void *address);

@@ -64,27 +64,33 @@ void _14(uint32 e)
     __asm__ volatile("mov %%cr2, %0"
                      : "=r"(address));
 
-    int present = !(e & 0x1); // Page not present
-    int rw = e & 0x2;         // Write operation?
-    int us = e & 0x4;         // Processor was in user-mode?
-    int reserved = e & 0x8;   // Overwritten CPU-reserved bits of page entry?
-    int id = e & 0x10;        // Caused by an instruction fetch?
-
     // Output an error message.
     print("Page fault! ( ");
-    if (present)
+    if (!(e & 0x01))
     {
-        if (rw)
+        if (e & 0x2)
         {
             print("read-only ");
         }
-        if (us)
+        if (e & 0x4)
         {
             print("user-mode ");
         }
-        if (reserved)
+        if (e & 0x8)
         {
             print("reserved ");
+        }
+        if (e & 0x20)
+        {
+            print("instruction-fetch ");
+        }
+        if (e & 0x40)
+        {
+            print("protection-key-violation ");
+        }
+        if (e & 0x80)
+        {
+            print("shadow-stack-access");
         }
     }
     else
