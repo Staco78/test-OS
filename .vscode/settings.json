@@ -5,7 +5,9 @@
         "keyboard.h": "c",
         "terminal.h": "c",
         "exceptions.h": "c",
-        "idt.h": "c"
+        "idt.h": "c",
+        "fs.h": "c",
+        "asm.h": "c"
     },
     "C_Cpp.default.systemIncludePath": [
         "src/include"
