@@ -107,7 +107,7 @@ typedef struct
     uint16 size;
     uint8 nameLength;
     uint8 type;
-    uint8 *name;
+    char *name;
 } directory;
 
 void waitDiskReady()
@@ -231,7 +231,7 @@ blockGroupDescriptor readBlockGroupDescriptor()
 
 uint8 *readBlock(uint32 index)
 {
-    uint8 *ptr = kmalloc();
+    uint8 *ptr = (uint8 *)kmalloc();
     readDisk(index * 8, 8, ptr);
     return ptr;
 }
@@ -251,7 +251,7 @@ directory readDirectory(inode *i, uint16 number)
     dir.size = *(uint16 *)(data + padding + 4);
     dir.nameLength = *(uint8 *)(data + padding + 6);
     dir.type = *(uint8 *)(data + padding + 7);
-    uint8 *name = sized_kmalloc(dir.nameLength);
+    char *name = (char *)sized_kmalloc(dir.nameLength);
     for (uint8 i = 0; i < dir.nameLength; i++)
     {
         name[i] = *(uint8 *)(data + padding + 8 + i);
@@ -400,7 +400,7 @@ void readDisk(uint32 startSector, uint16 nbSector, void *buff)
         while (!(read_port(0x1F7) & 8))
         {
         }
-        insw(0x1F0, (buff + i * 512), 256);
+        insw(0x1F0, ((uint8 *)buff + i * 512), 256);
         i++;
     }
 }

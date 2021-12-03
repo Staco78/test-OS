@@ -1,6 +1,6 @@
 #include "panic.h"
 
-void panic(uint8 *str)
+void panic(const char* str)
 {
     print("Kernel panic: ");
     print(str);

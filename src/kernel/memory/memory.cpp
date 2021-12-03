@@ -22,7 +22,7 @@ void push_stack(uint32 address)
         panic("Memory stack overflow");
         return;
     }
-    pages_stack[stack_index] = (void *)address;
+    pages_stack[stack_index] = (uint32 *)address;
 }
 
 void *pop_stack()
@@ -197,4 +197,5 @@ void kfree(void *address)
     if ((uint32)address % 4096 != 0)
         panic("Unable to free page: invalid address");
     unmap_page((uint32)address / 4096);
+    print("free\n");
 }
