@@ -3,6 +3,9 @@
 #include "types.h"
 #include "asm.h"
 #include "terminal.h"
+#include "panic.h"
+#include "memory.h"
 
-void readDisk(uint32 address, uint16 nbSector, uint8 *buff);
-void writeDisk(uint32 address, uint16 nbSector, uint8 *buff);
+void readDisk(uint32 startSector, uint16 nbSector, void *buff);
+void writeDisk(uint32 startSector, uint16 nbSector, void *buff);
+void fs_start();

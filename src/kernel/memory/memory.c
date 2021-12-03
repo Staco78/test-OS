@@ -139,9 +139,57 @@ void *kmalloc()
 {
     uint32 address = (uint32)pop_stack();
     map_page(address / 4096, address);
-    printInt(address / 4096);
-    printLn();
+    print("kmalloc\n");
     return (void *)address;
+}
+uint32 heap_stack[1024];
+uint16 heap_stack_index = 0;
+uint32 heap_address = 0;
+
+void *sized_kmalloc(uint32 size)
+{
+    if (size >= 4096)
+        panic("alloc size must be smaller than 4096 bytes");
+    if (heap_address == 0)
+    {
+        heap_address = (uint32)kmalloc();
+        if (heap_stack_index >= 1024)
+            panic("Heap out of memory");
+        heap_stack[heap_stack_index++] = heap_address;
+    }
+    if (heap_address / 4096 != (heap_address + size) / 4096)
+    {
+        heap_address = (uint32)kmalloc();
+        if (heap_stack_index >= 1024)
+            panic("Heap out of memory");
+        heap_stack[heap_stack_index++] = heap_address;
+    }
+    void *r = (void *)heap_address;
+    heap_address += size;
+    return r;
+}
+
+void sized_free(uint32 size)
+{
+    if (size >= 4096)
+        panic("free size must be smaller than 4096 bytes");
+    if (heap_address / 4096 != (heap_address - size) / 4096)
+    {
+        if (heap_stack_index == 0)
+            panic("Unable to free heap");
+        uint32 poped = heap_stack[--heap_stack_index];
+        kfree((void *)poped);
+        if (heap_stack_index == 0)
+            panic("Unable to free heap");
+        heap_address = heap_stack[heap_stack_index - 1] + 4095;
+    }
+    heap_address -= size;
+}
+
+void heap_init()
+{
+    heap_address = 0;
+    heap_stack_index = 0;
 }
 
 void kfree(void *address)
