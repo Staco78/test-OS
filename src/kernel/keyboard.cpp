@@ -1,4 +1,7 @@
 #include "keyboard.h"
+#include "types.h"
+#include "asm.h"
+#include "terminal.h"
 
 uint8 isCaps = 0;
 

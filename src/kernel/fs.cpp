@@ -1,4 +1,7 @@
 #include "fs.h"
+#include "asm.h"
+#include "terminal.h"
+#include "memory.h"
 
 void insw(uint16 port, void *addr, unsigned long count)
 {

@@ -1,4 +1,6 @@
 #include "terminal.h"
+#include "types.h"
+#include "asm.h"
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25

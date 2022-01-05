@@ -1,5 +1,6 @@
 #include "idt.h"
-
+#include "panic.h"
+#include "asm.h"
 #include "exceptions.h"
 
 extern void keyboard_interrupt(void);

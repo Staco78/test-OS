@@ -6,7 +6,7 @@
 
 
 # KERNEL_C_SRCS=$(wildcard src/kernel/*.c) $(wildcard src/kernel/**/*.c)
-KERNEL_CPP_SRCS=$(wildcard src/kernel/*.cpp) $(wildcard src/kernel/**/*.cpp)
+KERNEL_CPP_SRCS=$(wildcard src/kernel/*.cpp) $(wildcard src/kernel/**/*.cpp) $(wildcard src/lib/*.cpp)
 KERNEL_ASM_SRCS=$(wildcard src/kernel/*.asm)
 KERNEL_OBJS= $(KERNEL_ASM_SRCS:.asm=.o) $(KERNEL_CPP_SRCS:.cpp=.o)
 
@@ -16,7 +16,7 @@ dir:
 	mkdir build
 
 %.o: %.cpp
-	i686-elf-gcc -m32 -xc++ -ffreestanding -xnone -c $< -o $@ -fno-pie -fpermissive -Isrc/include
+	i686-elf-gcc -m32 -xc++ -ffreestanding -fno-rtti -fno-exceptions -xnone -c $< -o $@ -fno-pie -fpermissive -Isrc/include
 
 %.o: %.asm
 	nasm $< -f elf -o $@

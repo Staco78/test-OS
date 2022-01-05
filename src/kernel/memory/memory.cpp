@@ -1,4 +1,6 @@
 #include "memory.h"
+#include "panic.h"
+#include "terminal.h"
 
 struct memory_map
 {

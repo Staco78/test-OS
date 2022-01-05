@@ -1,4 +1,6 @@
 #include "panic.h"
+#include "terminal.h"
+#include "types.h"
 
 void _0()
 {
