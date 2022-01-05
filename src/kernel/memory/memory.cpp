@@ -24,7 +24,7 @@ void push_stack(uint32 address)
         panic("Memory stack overflow");
         return;
     }
-    pages_stack[stack_index] = (void *)address;
+    pages_stack[stack_index] = (uint32 *)address;
 }
 
 void *pop_stack()

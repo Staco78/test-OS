@@ -3,4 +3,4 @@
 #include "types.h"
 #include "terminal.h"
 
-void panic(uint8 *str);
+void panic(const char *str);

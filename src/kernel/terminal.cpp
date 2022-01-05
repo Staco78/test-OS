@@ -249,7 +249,7 @@ void printBin(uint8 n)
     }
 }
 
-void print(uint8 *str)
+void print(const char *str)
 {
     uint8 i = 0;
     while (str[i] != 0)
