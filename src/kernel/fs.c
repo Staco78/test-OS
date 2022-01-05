@@ -231,7 +231,7 @@ blockGroupDescriptor readBlockGroupDescriptor()
 
 uint8 *readBlock(uint32 index)
 {
-    uint8 *ptr = kmalloc();
+    uint8 *ptr = kmalloc(4096);
     readDisk(index * 8, 8, ptr);
     return ptr;
 }
@@ -251,11 +251,12 @@ directory readDirectory(inode *i, uint16 number)
     dir.size = *(uint16 *)(data + padding + 4);
     dir.nameLength = *(uint8 *)(data + padding + 6);
     dir.type = *(uint8 *)(data + padding + 7);
-    uint8 *name = sized_kmalloc(dir.nameLength);
+    uint8 *name = kmalloc(dir.nameLength + 1);
     for (uint8 i = 0; i < dir.nameLength; i++)
     {
         name[i] = *(uint8 *)(data + padding + 8 + i);
     }
+    name[dir.nameLength] = 0;
     dir.name = name;
     kfree(data);
     return dir;

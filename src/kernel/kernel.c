@@ -3,12 +3,11 @@
 #include "memory.h"
 #include "fs.h"
 
-
 void main()
 {
     terminalInit();
     idt_assemble();
 
     memory_init();
-    // fs_start();
+    fs_start();
 }
