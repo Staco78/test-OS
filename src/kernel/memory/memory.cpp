@@ -171,6 +171,7 @@ void alloc_init()
     heap_head->size = HEAP_SIZE;
 }
 
+
 void *kmalloc(uint32 size)
 {
     //find free node
@@ -188,7 +189,9 @@ void *kmalloc(uint32 size)
 found:
     // print("alloc ");
     // printInt(size);
-    // print("o\n");
+    // print("B at ");
+    // printHex(((uint32)current + sizeof(allocated_header)));
+    // printLn();
     if (current->size - size <= sizeof(allocated_header) + 1)
     {
         current->isFree = 0;
@@ -225,7 +228,7 @@ void kfree(void *address)
 found:
     // print("free ");
     // printInt(current->size);
-    // print("o\n");
+    // print("B\n");
     current->isFree = 1;
 
     if ((uint32)current->next == 0)
@@ -251,7 +254,7 @@ void printMemoryUsage()
     printChar('%');
     print(" (");
     printInt(used);
-    print("b / ");
+    print("B / ");
     printInt(HEAP_SIZE);
-    print("b)\n");
+    print("B)\n");
 }

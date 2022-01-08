@@ -260,3 +260,9 @@ void print(const char *str)
         i++;
     }
 }
+
+void print(const char *str, uint32 length)
+{
+    for (uint32 i = 0; i < length; i++)
+        printChar(str[i]);
+}

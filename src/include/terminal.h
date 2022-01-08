@@ -10,4 +10,5 @@ void print8bitHex(uint8 n);
 void printCustomHex(uint32 *data);
 void printBin(uint8 n);
 void print(const char *str);
+void print(const char *str, uint32 length);
 void printLn();
