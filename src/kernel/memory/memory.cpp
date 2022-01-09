@@ -12,36 +12,71 @@ struct memory_map
 void alloc_init();
 
 struct memory_map memory_maps[6];
-uint32 stack_index;
-__attribute__((aligned(4096))) uint32 *pages_stack[1024 * 1024];
 
-__attribute__((aligned(4096))) uint32 *paging_directory[1024];
-__attribute__((aligned(1048576))) uint32 *paging_tables[1024 * 1024];
+uint8 *memory_bitmap;
 
-void push_stack(uint32 address)
+uint32 **paging_directory;
+uint32 **paging_tables;
+
+void bitmap_set_1(uint32 index)
 {
-    stack_index++;
-    if (stack_index >= 1024 * 1024)
-    {
-        panic("Memory stack overflow");
-        return;
-    }
-    pages_stack[stack_index] = (uint32 *)address;
+    uint8 *bitmap = &memory_bitmap[index / 8];
+    *bitmap = *bitmap | (0b10000000 >> (index % 8));
 }
 
-void *pop_stack()
+void bitmap_set_0(uint32 index)
 {
-    if (stack_index == 0)
-    {
-        panic("Out of memory");
-        return 0;
-    }
-    return pages_stack[stack_index--];
+    uint8 *bitmap = &memory_bitmap[index / 8];
+    *bitmap = *bitmap & ~(0b10000000 >> (index % 8));
 }
 
-void initStack()
+int bitmap_get(uint32 index)
 {
-    stack_index = -1;
+    uint8 *bitmap = &memory_bitmap[index / 8];
+    return *bitmap & (0b10000000 >> (index % 8));
+}
+
+// return physical address of count free pages
+uint32 bitmap_find_free_pages(int count, uint32 alignment)
+{
+    uint32 index;
+    int size = 0;
+    for (uint32 i = 0; i < 131072 * 8; i++)
+    {
+        if (bitmap_get(i) == 0)
+        {
+            if (size == 0)
+            {
+                if ((i * 4096) % alignment == 0)
+                    index = i;
+                else
+                    continue;
+            }
+            size++;
+            if (size == count)
+                return index * 4096;
+        }
+        else
+            size = 0;
+    }
+    panic("Physical memory allocator: cannot find free pages");
+}
+
+// return physical address of count free pages and mark they used
+uint32 bitmap_get_free_pages_aligned(int count, uint32 alignment)
+{
+    if (alignment % 4096 != 0)
+        panic("Physical memory allocato: invalid alignment");
+    uint32 address = bitmap_find_free_pages(count, alignment);
+    for (uint32 i = address / 4096; i < address / 4096 + count; i++)
+        bitmap_set_1(i);
+    return address;
+}
+
+// return physical address of count free pages and mark they used
+uint32 bitmap_get_free_pages(int count)
+{
+    return bitmap_get_free_pages_aligned(count, 4096);
 }
 
 void createPagingTable(uint16 n)
@@ -98,8 +133,7 @@ void map_table(uint16 n, uint32 address)
 
 void memory_init()
 {
-    initStack();
-
+    memory_bitmap = (uint8 *)0x100000;
     uint8 *ptr = (uint8 *)0x8000;
     for (uint8 i = 0; i < 6; i++)
     {
@@ -108,44 +142,50 @@ void memory_init()
         memory_maps[i].type = (ptr[24 * i + 20]) + (ptr[24 * i + 21] << 8) + (ptr[24 * i + 22] << 16) + (ptr[24 * i + 23] << 24);
     }
 
+    // __asm__("xchgw %bx, %bx");
+
+    // fill bitmap with 1
+    for (int i = 0; i < 131072; i++)
+    {
+        memory_bitmap[i] = 0xFF;
+    }
+
     for (uint8 i = 0; i < 6; i++)
     {
         if (memory_maps[i].type == 1)
         {
             uint16 n = memory_maps[i].length / 4096;
-            for (uint16 y = 0; y < n; y++)
+            for (int j = memory_maps[i].address / 4096; j < n + (memory_maps[i].address / 4096); j++)
             {
-                push_stack((memory_maps[i].address + 4096 * y));
+                if (j * 4096 >= 0x100000){
+                    bitmap_set_0(j);
+                }
             }
         }
     }
+
+    for (int i = 32; i < 64; i++)
+    {
+        memory_bitmap[i] = 0xFF;
+    }
+
+    paging_directory = (uint32 **)bitmap_get_free_pages(1);
+    paging_tables = (uint32 **)bitmap_get_free_pages(1024);
+
 
     for (uint16 i = 0; i < 1024; i++)
     {
         paging_directory[i] = 0;
     }
 
-    map_page((uint32)paging_directory * 4, (uint32)paging_directory);
-
-    for (uint16 i = 0; i < 1024; i++)
-    {
-        map_page(((uint32)paging_tables / 1024 + i) * 4096, (uint32)(paging_tables + 1024 * i));
-    }
+    // map_page((uint32)paging_directory, (uint32)paging_directory);
 
     map_table(0, 0);
-    map_table(1, 4096 * 1024);
-    map_table(2, 4096 * 1024 * 2);
-
-    for (uint16 i = 0; i < 1024; i++)
-    {
-        map_page(((uint32)pages_stack / 1024 + i) * 4096, (uint32)(pages_stack + 1024 * i));
-    }
 
     __asm__ volatile("mov %0, %%cr3" ::"r"(paging_directory));
     __asm__ volatile("mov %%cr0, %%eax\n\r"
                      "or $0x80000000, %%eax\n\r"
                      "mov %%eax, %%cr0" ::);
-
     alloc_init();
 }
 
@@ -164,13 +204,13 @@ allocated_header *heap_head;
 
 void alloc_init()
 {
-    map_table(3, 4096 * 1024 * 3);
-    heap_head = (allocated_header *)(4096 * 1024 * 3);
+    uint32 address = bitmap_get_free_pages_aligned(1024, 4096 * 1024);
+    map_table(address / (4096 * 1024), address);
+    heap_head = (allocated_header *)(address);
     heap_head->isFree = 1;
     heap_head->next = 0;
     heap_head->size = HEAP_SIZE;
 }
-
 
 void *kmalloc(uint32 size)
 {

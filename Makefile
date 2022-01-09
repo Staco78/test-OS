@@ -12,6 +12,8 @@ KERNEL_OBJS= $(KERNEL_ASM_SRCS:.asm=.o) $(KERNEL_CPP_SRCS:.cpp=.o)
 
 all: clean dir run clean_after
 
+bochs: clean dir run_bochs clean_after
+
 dir:
 	mkdir build
 
@@ -43,6 +45,10 @@ build/os-image.bin: build/boot.bin build/kernel.bin
 
 run: build/os-image.bin
 	qemu-system-i386 -drive format=raw,file=$<,index=0,if=floppy -boot a -hda disk.img -monitor stdio
+
+run_bochs: build/os-image.bin
+	bochs
+
 clean:
 	$(RM) -r build
 	$(RM) -f ./**/**/*.o

@@ -133,6 +133,7 @@ typedef struct
 
 Superblock superblock;
 BlockGroupDescriptor blockDescriptor;
+Inode rootDirectoryInode;
 
 void waitDiskReady()
 {
@@ -339,7 +340,7 @@ uint32 getBlockPointer(const Inode *inode, uint16 index)
         index += 12;
         if (index < (superblock.blockSize / 4))
         {
-            // simgly indirect block pointer
+            // singly indirect block pointer
             uint32 *data = (uint32 *)kmalloc(superblock.blockSize);
             readBlock(inode->indirectPointer, data);
             uint32 ptr = data[index];
@@ -489,19 +490,15 @@ void fs_start()
 
     superblock = readSuperblock();
     blockDescriptor = readBlockGroupDescriptor();
-    Inode rootDirectoryInode = readInode(2);
-    DirectoryEntry file;
-    findDirectoryEntryFromPath(&rootDirectoryInode, &file, "/x/tt.png", 0);
-    print(file.name);
-    printLn();
-    Inode fileInode = readInode(file.inode);
+    rootDirectoryInode = readInode(2);
 
-    void *buff = kmalloc(fileInode.lowerSize / 4);
-    for (int i = 0; i < fileInode.lowerSize; i += fileInode.lowerSize / 4)
-    {
-        readInodeData(&fileInode, buff, i, fileInode.lowerSize / 4);
-        print((char *)buff, fileInode.lowerSize / 4);
-    }
+    DirectoryEntry file;
+    findDirectoryEntryFromPath(&rootDirectoryInode, &file, "/coucou", 0);
+    Inode fileInode = readInode(file.inode);
+    char* data = (char*)kmalloc(fileInode.lowerSize);
+    readInodeData(&fileInode, data, 0, fileInode.lowerSize);
+    print(data, fileInode.lowerSize);
+    kfree(data);
 }
 
 void identify_disk()
