@@ -418,7 +418,7 @@ uint32 readInodeData(const Inode *inode, void *buff, uint32 offset, uint32 size)
     return buffOffset;
 }
 
-void findDirectoryEntryFromPath(const Inode *baseInode, DirectoryEntry *directoryEntry, char *path, uint16 pathOffset)
+void findDirectoryEntryFromPath(const Inode *baseInode, DirectoryEntry *directoryEntry, const char *path, uint16 pathOffset)
 {
     if (path[pathOffset] == '/')
         pathOffset++;

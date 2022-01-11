@@ -60,6 +60,7 @@ uint32 bitmap_find_free_pages(int count, uint32 alignment)
             size = 0;
     }
     panic("Physical memory allocator: cannot find free pages");
+    return 0;
 }
 
 // return physical address of count free pages and mark they used
@@ -157,7 +158,8 @@ void memory_init()
             uint16 n = memory_maps[i].length / 4096;
             for (int j = memory_maps[i].address / 4096; j < n + (memory_maps[i].address / 4096); j++)
             {
-                if (j * 4096 >= 0x100000){
+                if (j * 4096 >= 0x100000)
+                {
                     bitmap_set_0(j);
                 }
             }
@@ -172,13 +174,10 @@ void memory_init()
     paging_directory = (uint32 **)bitmap_get_free_pages(1);
     paging_tables = (uint32 **)bitmap_get_free_pages(1024);
 
-
     for (uint16 i = 0; i < 1024; i++)
     {
         paging_directory[i] = 0;
     }
-
-    // map_page((uint32)paging_directory, (uint32)paging_directory);
 
     map_table(0, 0);
 
