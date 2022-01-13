@@ -19,4 +19,4 @@ init_32bit:
     mov ebp, 0x90000        ; 6. setup stack
     mov esp, ebp
 
-    call BEGIN_32BIT        ; 7. move back to mbr.asm
+    call BEGIN_32BIT

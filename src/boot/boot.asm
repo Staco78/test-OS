@@ -43,9 +43,10 @@ load_kernel:
 
 [bits 32]
 BEGIN_32BIT:
-
-    call KERNEL_OFFSET ; give control to the kernel
-    jmp $ ; loop in case kernel returns
+	mov sp, bp
+	push long gdt_descriptor
+    jmp KERNEL_OFFSET ; give control to the kernel
+    ; jmp $ ; loop in case kernel returns
 
 ; boot drive variable
 BOOT_DRIVE db 0

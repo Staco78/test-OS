@@ -17,6 +17,7 @@ uint8 *memory_bitmap;
 
 uint32 **paging_directory;
 uint32 **paging_tables;
+uint32 **paging_tables_physical;
 
 void bitmap_set_1(uint32 index)
 {
@@ -80,34 +81,33 @@ uint32 bitmap_get_free_pages(int count)
     return bitmap_get_free_pages_aligned(count, 4096);
 }
 
-void createPagingTable(uint16 n)
+void createPagingTable(uint16 tableIndex)
 {
-    paging_directory[n] = (uint32 *)(((uint32)(paging_tables + n * 1024) & 0xFFFFF000) | 3);
+    paging_directory[tableIndex] = (uint32 *)(((uint32)(paging_tables_physical + tableIndex * 1024) & 0xFFFFF000) | 3);
+    
     for (uint16 i = 0; i < 1024; i++)
     {
-        paging_tables[n * 1024 + i] = 0;
+        paging_tables[tableIndex * 1024 + i] = 0;
     }
 }
 
 // remap 4 Kio from baseAddress to virtualAddress
-void map_page(uint32 baseAddress, uint32 virtualAddress)
+void map_page(uint32 virtualAddress, uint32 physicalAddress)
 {
-    if (baseAddress % 4096 != 0)
-    {
-        printHex(baseAddress);
-        printLn();
-        panic("Invalid address to remap");
-    }
-
     if (virtualAddress % 4096 != 0)
-        panic("Invalid address to remap");
-
-    if (paging_directory[baseAddress / 4194304] == 0) // 4194304 = 4096 * 1024
     {
-        createPagingTable(baseAddress / 4194304);
+        panic("Invalid address to remap");
     }
 
-    paging_tables[baseAddress / 4096] = (uint32 *)((virtualAddress & 0xFFFFF000) | 3);
+    if (physicalAddress % 4096 != 0)
+        panic("Invalid address to remap");
+
+    if (paging_directory[virtualAddress / 4194304] == 0) // 4194304 = 4096 * 1024
+    {
+        createPagingTable(virtualAddress / 4194304);
+    }
+
+    paging_tables[virtualAddress / 4096] = (uint32 *)((physicalAddress & 0xFFFFF000) | 3);
 }
 
 void unmap_page(uint32 baseAddress)
@@ -115,27 +115,27 @@ void unmap_page(uint32 baseAddress)
     paging_tables[baseAddress / 4096] = 0;
 }
 
-void map_table(uint16 n, uint32 address)
+void map_table(uint16 tableIndex, uint32 virtualAddress)
 {
 
-    if (address % 4096 != 0)
+    if (virtualAddress % 4096 != 0)
         panic("Invalid address to remap");
 
-    if (paging_directory[n] == 0)
+    if (paging_directory[tableIndex] == 0)
     {
-        createPagingTable(n);
+        createPagingTable(tableIndex);
     }
 
     for (uint16 i = 0; i < 1024; i++)
     {
-        map_page((n * 1024 + i) * 4096, address + i * 4096);
+        map_page(virtualAddress + i * 4096, (tableIndex * 1024 + i) * 4096);
     }
 }
 
 void memory_init()
 {
-    memory_bitmap = (uint8 *)0x100000;
-    uint8 *ptr = (uint8 *)0x8000;
+    memory_bitmap = (uint8 *)0xC0500000;
+    uint8 *ptr = (uint8 *)0xC0008000;
     for (uint8 i = 0; i < 6; i++)
     {
         memory_maps[i].address = (ptr[24 * i + 4]) + (ptr[24 * i + 5] << 8) + (ptr[24 * i + 6] << 16) + (ptr[24 * i + 7] << 24);
@@ -150,6 +150,7 @@ void memory_init()
     {
         memory_bitmap[i] = 0xFF;
     }
+    // __asm__("xchgw %bx, %bx");
 
     for (uint8 i = 0; i < 6; i++)
     {
@@ -166,26 +167,19 @@ void memory_init()
         }
     }
 
-    for (int i = 32; i < 64; i++)
+    for (int i = 32; i < 164; i++)
     {
         memory_bitmap[i] = 0xFF;
     }
 
-    paging_directory = (uint32 **)bitmap_get_free_pages(1);
-    paging_tables = (uint32 **)bitmap_get_free_pages(1024);
+    paging_directory = (uint32 **)0xC0100000;
+    paging_tables = (uint32 **)0xC0101000;
+    paging_tables_physical = (uint32 **)0x00101000;
 
-    for (uint16 i = 0; i < 1024; i++)
-    {
-        paging_directory[i] = 0;
-    }
-
-    map_table(0, 0);
-
-    __asm__ volatile("mov %0, %%cr3" ::"r"(paging_directory));
-    __asm__ volatile("mov %%cr0, %%eax\n\r"
-                     "or $0x80000000, %%eax\n\r"
-                     "mov %%eax, %%cr0" ::);
     alloc_init();
+    // __asm__("xchgw %bx, %bx");
+
+    // __asm__ volatile("mov %0, %%cr3" ::"r"(paging_directory));
 }
 
 #define HEAP_SIZE 4194304 // 4 Mio
@@ -203,9 +197,14 @@ allocated_header *heap_head;
 
 void alloc_init()
 {
+    // __asm__("xchgw %bx, %bx");
     uint32 address = bitmap_get_free_pages_aligned(1024, 4096 * 1024);
-    map_table(address / (4096 * 1024), address);
-    heap_head = (allocated_header *)(address);
+    map_table(address / (4096 * 1024), address + 0xC0000000);
+
+    // __asm__ volatile("mov %cr3, %eax\n"
+    //  "mov %eax, %cr3");
+
+    heap_head = (allocated_header *)(address + 0xC0000000);
     heap_head->isFree = 1;
     heap_head->next = 0;
     heap_head->size = HEAP_SIZE;

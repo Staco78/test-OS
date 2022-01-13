@@ -17,7 +17,7 @@ void _printChar(uint8 c)
 
 void terminalInit()
 {
-    memory_address = (uint8 *)0xB8000;
+    memory_address = (uint8 *)0xC00B8000;
     clear();
 }
 

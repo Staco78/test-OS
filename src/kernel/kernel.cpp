@@ -7,7 +7,6 @@ void main()
 {
     terminalInit();
     idt_assemble();
-
     memory_init();
     fs_start();
 }

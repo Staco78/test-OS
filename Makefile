@@ -25,7 +25,7 @@ dir:
 
 
 build/kernel.bin: build/kernel-entry.o $(KERNEL_OBJS) 
-	i686-elf-ld -m elf_i386 -o $@ -Ttext 0x1000 $^ --oformat binary
+	i686-elf-ld -m elf_i386 -o $@ -t linker.ld $^ --oformat binary 
 
 
 # build/kernel.o: src/kernel/kernel.c
