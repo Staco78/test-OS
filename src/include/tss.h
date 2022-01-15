@@ -36,7 +36,7 @@ struct tss_entry_struct
 
 void write_tss(uint32 gdtAddress)
 {
-    tss_entry_struct *tss_entry = (tss_entry_struct *)kmalloc(sizeof(tss_entry_struct));
+    tss_entry_struct *tss_entry = (tss_entry_struct *)Memory::KernelAlloc::kmalloc(sizeof(tss_entry_struct));
     uint8 *gdt = (uint8 *)gdtAddress + 8 * 5;
 
     uint32 base = (uint32)tss_entry;

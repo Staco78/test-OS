@@ -8,7 +8,7 @@ class String
 public:
     String(const char *str)
     {
-        head = (node *)kmalloc(sizeof(node));
+        head = (node *)Memory::KernelAlloc::kmalloc(sizeof(node));
         last = head;
         uint32 length = 0;
         while (str[length++])
@@ -32,8 +32,8 @@ public:
         for (int i = 0; i < size; i++)
         {
             node *next = current->next;
-            kfree(current->data);
-            kfree(current);
+            Memory::KernelAlloc::kfree(current->data);
+            Memory::KernelAlloc::kfree(current);
             current = next;
         }
 

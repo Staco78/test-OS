@@ -8,7 +8,7 @@ class LinkedList
 public:
     void push(T data)
     {
-        Node *new_node = (Node *)kmalloc(sizeof(Node));
+        Node *new_node = (Node *)Memory::KernelAlloc::kmalloc(sizeof(Node));
         new_node->data = data;
         if (last == nullptr)
         {
@@ -43,7 +43,7 @@ public:
         for (int i = 0; i < size; i++)
         {
             Node *next = current->next;
-            kfree(current);
+            Memory::KernelAlloc::kfree(current);
             current = next;
         }
 

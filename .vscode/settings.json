@@ -1,14 +1,14 @@
 {
     "files.associations": {
         "*.gyp": "json",
-        "memory.h": "c",
-        "keyboard.h": "c",
-        "terminal.h": "c",
-        "exceptions.h": "c",
-        "idt.h": "c",
-        "fs.h": "c",
-        "asm.h": "c",
-        "types.h": "c"
+        "memory.h": "cpp",
+        "keyboard.h": "cpp",
+        "terminal.h": "cpp",
+        "exceptions.h": "cpp",
+        "idt.h": "cpp",
+        "fs.h": "cpp",
+        "asm.h": "cpp",
+        "types.h": "cpp"
     },
     "C_Cpp.default.systemIncludePath": [
         "src/include"

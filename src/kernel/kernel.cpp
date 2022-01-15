@@ -20,7 +20,7 @@ void main(uint32 gdtAddress)
 {
     terminalInit();
     idt_assemble();
-    memory_init();
+    Memory::init();
 
     write_tss(gdtAddress);
 

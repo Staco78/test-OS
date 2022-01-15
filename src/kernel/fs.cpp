@@ -154,7 +154,7 @@ Inode readInode(uint32 number)
 {
     number -= 1;
     uint32 inodeBlock = (number * superblock.inodeSize) / superblock.blockSize;
-    uint8 *inode_table_buffer = (uint8 *)kmalloc(4096);
+    uint8 *inode_table_buffer = (uint8 *)Memory::KernelAlloc::kmalloc(4096);
     readDisk((blockDescriptor.inodeTableAddress + inodeBlock) * 8, 8, inode_table_buffer);
     Inode inode;
     uint32 baseOffset = (uint32)inode_table_buffer + superblock.inodeSize * number;
@@ -193,7 +193,7 @@ Inode readInode(uint32 number)
     inode.reserved3 = *(uint32 *)(baseOffset + 120);
     inode.reserved4 = *(uint32 *)(baseOffset + 124);
 
-    kfree(inode_table_buffer);
+    Memory::KernelAlloc::kfree(inode_table_buffer);
     return inode;
 }
 
@@ -264,7 +264,7 @@ inline void readBlock(uint32 index, void *buff)
 void readDirectory(Inode *inode, LinkedList<DirectoryEntry> &list)
 {
     uint32 size = inode->lowerSize;
-    uint8 *data = (uint8 *)kmalloc(superblock.blockSize);
+    uint8 *data = (uint8 *)Memory::KernelAlloc::kmalloc(superblock.blockSize);
     readBlock(inode->directPointer0, data);
 
     uint32 padding = 0;
@@ -278,7 +278,7 @@ void readDirectory(Inode *inode, LinkedList<DirectoryEntry> &list)
             break;
         list[i].nameLength = *(uint8 *)(data + padding + 6);
         list[i].type = *(uint8 *)(data + padding + 7);
-        char *name = (char *)kmalloc(list[i].nameLength + 1);
+        char *name = (char *)Memory::KernelAlloc::kmalloc(list[i].nameLength + 1);
         for (uint8 j = 0; j < list[i].nameLength; j++)
         {
             name[j] = *(uint8 *)(data + padding + 8 + j);
@@ -288,7 +288,7 @@ void readDirectory(Inode *inode, LinkedList<DirectoryEntry> &list)
         padding += list[i].size;
     }
 
-    kfree(data);
+    Memory::KernelAlloc::kfree(data);
 }
 
 uint32 getBlockPointer(const Inode *inode, uint16 index)
@@ -341,34 +341,34 @@ uint32 getBlockPointer(const Inode *inode, uint16 index)
         if (index < (superblock.blockSize / 4))
         {
             // singly indirect block pointer
-            uint32 *data = (uint32 *)kmalloc(superblock.blockSize);
+            uint32 *data = (uint32 *)Memory::KernelAlloc::kmalloc(superblock.blockSize);
             readBlock(inode->indirectPointer, data);
             uint32 ptr = data[index];
-            kfree(data);
+            Memory::KernelAlloc::kfree(data);
             return ptr;
         }
         else if (index < (superblock.blockSize / 4) * (superblock.blockSize / 4))
         {
             // doubly indirect block pointer
-            uint32 *data = (uint32 *)kmalloc(superblock.blockSize);
+            uint32 *data = (uint32 *)Memory::KernelAlloc::kmalloc(superblock.blockSize);
             readBlock(inode->doubleIndirectPointer, data);
             uint32 indirectBlockIndex = data[index / (superblock.blockSize / 4)];
             readBlock(indirectBlockIndex, data);
             uint32 doubleIndirectPointer = data[index % (superblock.blockSize / 4)];
-            kfree(data);
+            Memory::KernelAlloc::kfree(data);
             return doubleIndirectPointer;
         }
         else if (index < (superblock.blockSize / 4) * (superblock.blockSize / 4) * (superblock.blockSize / 4))
         {
             // triply indirect block pointer
-            uint32 *data = (uint32 *)kmalloc(superblock.blockSize);
+            uint32 *data = (uint32 *)Memory::KernelAlloc::kmalloc(superblock.blockSize);
             readBlock(inode->doubleIndirectPointer, data);
             uint32 indirectBlockIndex = data[index / (superblock.blockSize / 4) / (superblock.blockSize / 4)];
             readBlock(indirectBlockIndex, data);
             uint32 doubleIndirectPointer = data[(index / (superblock.blockSize / 4)) % (superblock.blockSize / 4)];
             readBlock(doubleIndirectPointer, data);
             uint32 tripleIndirectPointer = data[index % (superblock.blockSize / 4)];
-            kfree(data);
+            Memory::KernelAlloc::kfree(data);
             return tripleIndirectPointer;
         }
     }
@@ -388,12 +388,12 @@ uint32 readInodeData(const Inode *inode, void *buff, uint32 offset, uint32 size)
 
     if (offset % superblock.blockSize != 0)
     {
-        void *data = kmalloc(superblock.blockSize);
+        void *data = Memory::KernelAlloc::kmalloc(superblock.blockSize);
         readBlock(getBlockPointer(inode, blockIndex), data);
         memcpy(buff, (uint8 *)data + offset % superblock.blockSize, superblock.blockSize - (offset % superblock.blockSize));
         sizeToRead -= (offset % superblock.blockSize);
         buffOffset += (offset % superblock.blockSize);
-        kfree(data);
+        Memory::KernelAlloc::kfree(data);
         blockIndex++;
     }
     while (sizeToRead > 0)
@@ -406,10 +406,10 @@ uint32 readInodeData(const Inode *inode, void *buff, uint32 offset, uint32 size)
         }
         else
         {
-            void *data = kmalloc(superblock.blockSize);
+            void *data = Memory::KernelAlloc::kmalloc(superblock.blockSize);
             readBlock(getBlockPointer(inode, blockIndex++), data);
             memcpy((uint8 *)buff + buffOffset, data, sizeToRead);
-            kfree(data);
+            Memory::KernelAlloc::kfree(data);
             buffOffset += sizeToRead;
             sizeToRead = 0;
         }
@@ -432,11 +432,11 @@ void findDirectoryEntryFromPath(const Inode *baseInode, DirectoryEntry *director
 
     uint32 offset = 0;
     uint32 read = 0;
-    uint8 *data = (uint8 *)kmalloc(superblock.blockSize);
+    uint8 *data = (uint8 *)Memory::KernelAlloc::kmalloc(superblock.blockSize);
 loop:
     if (offset >= baseInode->lowerSize)
     {
-        kfree(data);
+        Memory::KernelAlloc::kfree(data);
         panic("fs: file not found");
     }
     if (read == offset)
@@ -464,7 +464,7 @@ loop:
     directoryEntry->size = *(uint16 *)(data + offset + 4);
     directoryEntry->nameLength = *(uint8 *)(data + offset + 6);
     directoryEntry->type = *(uint8 *)(data + offset + 7);
-    char *name = (char *)kmalloc(directoryEntry->nameLength + 1);
+    char *name = (char *)Memory::KernelAlloc::kmalloc(directoryEntry->nameLength + 1);
     for (uint8 j = 0; j < directoryEntry->nameLength; j++)
     {
         name[j] = *(uint8 *)(data + offset + 8 + j);
@@ -472,7 +472,7 @@ loop:
     name[directoryEntry->nameLength] = 0;
     directoryEntry->name = name;
 
-    kfree(data);
+    Memory::KernelAlloc::kfree(data);
     if (directoryEntry->type == DIRECTORY_ENTRY_TYPE_DIRECTORY)
     {
         Inode inode = readInode(directoryEntry->inode);
@@ -495,15 +495,15 @@ void fs_start()
     DirectoryEntry file;
     findDirectoryEntryFromPath(&rootDirectoryInode, &file, "/coucou", 0);
     Inode fileInode = readInode(file.inode);
-    char* data = (char*)kmalloc(fileInode.lowerSize);
+    char *data = (char *)Memory::KernelAlloc::kmalloc(fileInode.lowerSize);
     readInodeData(&fileInode, data, 0, fileInode.lowerSize);
     print(data, fileInode.lowerSize);
-    kfree(data);
+    Memory::KernelAlloc::kfree(data);
 }
 
 void identify_disk()
 {
-    uint8 *buff = (uint8 *)kmalloc(512);
+    uint8 *buff = (uint8 *)Memory::KernelAlloc::kmalloc(512);
     write_port(0x1F2, 0);
     write_port(0x1F3, 0);
     write_port(0x1F4, 0);
@@ -513,7 +513,7 @@ void identify_disk()
 
     insw(0x1F0, buff, 256);
 
-    kfree(buff);
+    Memory::KernelAlloc::kfree(buff);
 }
 
 void readDisk(uint32 startSector, uint16 nbSector, void *buff)
