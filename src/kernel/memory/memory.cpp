@@ -83,8 +83,8 @@ uint32 bitmap_get_free_pages(int count)
 
 void createPagingTable(uint16 tableIndex)
 {
-    paging_directory[tableIndex] = (uint32 *)(((uint32)(paging_tables_physical + tableIndex * 1024) & 0xFFFFF000) | 3);
-    
+    paging_directory[tableIndex] = (uint32 *)(((uint32)(paging_tables_physical + tableIndex * 1024) & 0xFFFFF000) | 7);
+
     for (uint16 i = 0; i < 1024; i++)
     {
         paging_tables[tableIndex * 1024 + i] = 0;
@@ -107,7 +107,7 @@ void map_page(uint32 virtualAddress, uint32 physicalAddress)
         createPagingTable(virtualAddress / 4194304);
     }
 
-    paging_tables[virtualAddress / 4096] = (uint32 *)((physicalAddress & 0xFFFFF000) | 3);
+    paging_tables[virtualAddress / 4096] = (uint32 *)((physicalAddress & 0xFFFFF000) | 7);
 }
 
 void unmap_page(uint32 baseAddress)

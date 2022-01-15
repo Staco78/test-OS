@@ -2,6 +2,7 @@
 #include "panic.h"
 #include "asm.h"
 #include "exceptions.h"
+#include "terminal.h"
 
 extern void keyboard_interrupt(void);
 
@@ -22,9 +23,16 @@ void idt_set_descriptor(uint8 vector, uint32 isr)
 
     descriptor->base_low = isr & 0xFFFF;
     descriptor->cs = 0x08;
-    descriptor->attributes = 0x8E;
+    descriptor->attributes = 0xEE;
     descriptor->base_high = (isr >> 16) & 0xFFFF;
     descriptor->reserved = 0;
+}
+
+extern "C" void syscall();
+
+extern "C" void syscall_c()
+{
+    print("user\n");
 }
 
 void idt_assemble()
@@ -68,6 +76,8 @@ void idt_assemble()
     idt_set_descriptor(31, (uint32)exception_handler);
 
     idt_set_descriptor(0x21, (uint32)keyboard_interrupt);
+
+    idt_set_descriptor(0x80, (uint32)syscall);
 
     write_port(0x20, 0x11);
     write_port(0xA0, 0x11);

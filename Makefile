@@ -27,10 +27,6 @@ dir:
 build/kernel.bin: build/kernel-entry.o $(KERNEL_OBJS) 
 	i686-elf-ld -m elf_i386 -o $@ -t linker.ld $^ --oformat binary 
 
-
-# build/kernel.o: src/kernel/kernel.c
-# 	i686-elf-gcc -m32 -ffreestanding -c src/kernel/kernel.c -o build/kernel.o -fno-pie
-
 build/kernel-entry.o: src/boot/kernel-entry.asm
 	nasm src/boot/kernel-entry.asm -f elf -o build/kernel-entry.o
 

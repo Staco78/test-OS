@@ -43,6 +43,7 @@ public:
         for (int i = 0; i < size; i++)
         {
             Node *next = current->next;
+            kfree(current);
             current = next;
         }
 
