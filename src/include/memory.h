@@ -21,9 +21,33 @@ namespace Memory
 
     namespace Pages
     {
+
+        struct Directory
+        {
+            uint32 physicalAddress;
+            uint32 virtualTablesPhysicalAddress;
+            uint32 *tablesPhysical;
+            uint32 *tables;
+        };
+
         void init();
 
-        void map_table(uint16 tableIndex, uint32 virtualAddress);
+        void kernel_map_table(uint16 tableIndex, uint32 virtualAddress);
+
+        // remap 4 Kio from physicalAddress to virtualAddress
+        void kernel_map_page(uint32 virtualAddress, uint32 physicalAddress);
+
+        // copy kernel paging directory to an other
+        void copy_kernel_pages(Directory *to);
+
+        // remap 4 Kio from physicalAddress to virtualAddress
+        void map_page(Directory *directory, uint32 virtualAddress, uint32 physicalAddress);
+
+        void alloc_pages(Directory *directory, uint32 count, uint32 virtualAddress);
+
+        void create_directory(Directory *directory);
+
+
     } // namespace Pages
 
     namespace KernelAlloc

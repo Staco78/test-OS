@@ -17,7 +17,7 @@ jl loop_clear_directory
 
 ; map table 0 to 0x00000000 ==> 0x00000000
 mov eax, TABLE_ADDRESS_0
-mov ebx, 7
+mov ebx, 3
 loop_table_0:
 mov long [eax], ebx
 add eax, 4
@@ -27,7 +27,7 @@ jl loop_table_0
 
 ; map table 768 to 0xC0000000 ==> 0x00000000
 mov eax, TABLE_ADDRESS_768
-mov ebx, 7
+mov ebx, 3
 loop_table_768:
 mov long [eax], ebx
 add eax, 4
@@ -38,7 +38,7 @@ jl loop_table_768
 
 ; map table 769 to 0xC0400000 ==> 0x00400000
 mov eax, TABLE_ADDRESS_769
-mov ebx, 0x400007
+mov ebx, 0x400003
 loop_table_769:
 mov long [eax], ebx
 add eax, 4
@@ -50,9 +50,9 @@ jl loop_table_769
 mov long [DIRECTORY_ADDRESS], TABLE_ADDRESS_0  ; put tables addresses into directory
 or long [DIRECTORY_ADDRESS], 7
 mov long [DIRECTORY_ADDRESS + 768 * 4], TABLE_ADDRESS_768
-or long [DIRECTORY_ADDRESS + 768 * 4], 7
+or long [DIRECTORY_ADDRESS + 768 * 4], 3
 mov long [DIRECTORY_ADDRESS + 769 * 4], TABLE_ADDRESS_769
-or long [DIRECTORY_ADDRESS + 769 * 4], 7
+or long [DIRECTORY_ADDRESS + 769 * 4], 3
 
 
 mov eax, DIRECTORY_ADDRESS ; active pagination

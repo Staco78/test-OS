@@ -203,9 +203,7 @@ void printCustomHex(uint32 *data)
 void printHex(uint32 n)
 {
     uint8 i = 0;
-    uint8 str[8] = {
-        0,
-    };
+    uint8 str[8];
 
     while (i < 8)
     {

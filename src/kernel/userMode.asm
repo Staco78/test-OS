@@ -2,6 +2,11 @@ global jump_userMode
 
 extern user_func
 jump_userMode:
+    pop ecx
+    pop ecx
+    pop ebx
+    pop ebp
+
     cli
     mov ax, (4 * 8) | 3
     mov ds, ax
@@ -20,13 +25,13 @@ jump_userMode:
 
     ; xchg bx, bx
 
-    mov eax, esp
+
     push (4 * 8) | 3
-    push eax
+    push ebx
     pushf
     pop eax
     or eax, 0x200
     push eax
     push (3 * 8) | 3
-    push user_func
+    push ecx
     iret

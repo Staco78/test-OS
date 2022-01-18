@@ -66,7 +66,7 @@ namespace Memory
         uint32 get_free_pages_aligned(int count, uint32 alignment)
         {
             if (alignment % 4096 != 0)
-                panic("Physical memory allocato: invalid alignment");
+                panic("Physical memory allocator: invalid alignment");
             uint32 address = find_free_pages(count, alignment);
             for (uint32 i = address / 4096; i < address / 4096 + count; i++)
                 set_1(i);
@@ -82,15 +82,13 @@ namespace Memory
         void init()
         {
             memory_bitmap = (uint8 *)0xC0500000;
-            uint8 *ptr = (uint8 *)0xC0008000;
+            uint8 *ptr = (uint8 *)0xC000F000;
             for (uint8 i = 0; i < 6; i++)
             {
                 memory_maps[i].address = (ptr[24 * i + 4]) + (ptr[24 * i + 5] << 8) + (ptr[24 * i + 6] << 16) + (ptr[24 * i + 7] << 24);
                 memory_maps[i].length = (ptr[24 * i + 12]) + (ptr[24 * i + 13] << 8) + (ptr[24 * i + 14] << 16) + (ptr[24 * i + 15] << 24);
                 memory_maps[i].type = (ptr[24 * i + 20]) + (ptr[24 * i + 21] << 8) + (ptr[24 * i + 22] << 16) + (ptr[24 * i + 23] << 24);
             }
-
-            // __asm__("xchgw %bx, %bx");
 
             // fill bitmap with 1
             for (int i = 0; i < 131072; i++)
@@ -101,6 +99,7 @@ namespace Memory
 
             for (uint8 i = 0; i < 6; i++)
             {
+                // __asm__("xchgw %bx, %bx");
                 if (memory_maps[i].type == 1)
                 {
                     uint16 n = memory_maps[i].length / 4096;

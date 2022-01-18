@@ -3,26 +3,15 @@
 #include "memory.h"
 #include "fs.h"
 #include "tss.h"
-
-extern "C" void jump_userMode();
-
-extern "C" void user_func()
-{
-
-    // __asm__ volatile("xchgw %bx, %bx");
-    while (1)
-    {
-        __asm__("int $0x80");
-    }
-}
+#include "processes.h"
 
 void main(uint32 gdtAddress)
 {
     terminalInit();
     idt_assemble();
     Memory::init();
-
+    Fs::init();
     write_tss(gdtAddress);
 
-    jump_userMode();
+    create_process("/program");
 }

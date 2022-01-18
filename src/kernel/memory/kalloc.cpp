@@ -22,7 +22,7 @@ namespace Memory
         void init()
         {
             uint32 address = Physical::get_free_pages_aligned(1024, 4096 * 1024);
-            Pages::map_table(address / (4096 * 1024), address + 0xC0000000);
+            Pages::kernel_map_table(address / (4096 * 1024), address + 0xC0000000);
 
             heap_head = (allocated_header *)(address + 0xC0000000);
             heap_head->isFree = 1;

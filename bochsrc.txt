@@ -10,3 +10,4 @@ ata0-master: type=disk, path="disk.img", mode=flat, cylinders=1024, heads=4, spt
 boot: a
 mouse: enabled=0 
 magic_break: enabled=1
+cpu: reset_on_triple_fault=0
