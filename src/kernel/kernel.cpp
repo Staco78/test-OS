@@ -4,14 +4,15 @@
 #include "fs.h"
 #include "tss.h"
 #include "processes.h"
+#include "clock.h"
 
 void main(uint32 gdtAddress)
 {
     terminalInit();
     idt_assemble();
     Memory::init();
-    Fs::init();
-    write_tss(gdtAddress);
+    Clock::init();
 
-    create_process("/program");
+    // Fs::init();
+    // write_tss(gdtAddress);
 }

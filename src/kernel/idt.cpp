@@ -3,6 +3,7 @@
 #include "asm.h"
 #include "exceptions.h"
 #include "terminal.h"
+#include "clock.h"
 
 extern void keyboard_interrupt(void);
 
@@ -76,6 +77,7 @@ void idt_assemble()
     idt_set_descriptor(31, (uint32)exception_handler);
 
     idt_set_descriptor(0x21, (uint32)keyboard_interrupt);
+    idt_set_descriptor(0x28, (uint32)Clock::interrupt);
 
     idt_set_descriptor(0x80, (uint32)syscall);
 
@@ -90,23 +92,27 @@ void idt_assemble()
     write_port(0x21, 0x20);
     write_port(0xA1, 0x28);
 
-    /* ICW3 - setup cascading */
-    write_port(0x21, 0x00);
-    write_port(0xA1, 0x00);
+    write_port(0x21, 0x04);
+    write_port(0xA1, 0x02);
 
     /* ICW4 - environment info */
     write_port(0x21, 0x01);
     write_port(0xA1, 0x01);
     /* Initialization finished */
 
+    /* ICW3 - setup cascading */
+    write_port(0x21, 0x00);
+    write_port(0xA1, 0x00);
+
     /* mask interrupts */
-    write_port(0x21, 0xff);
-    write_port(0xA1, 0xff);
+    write_port(0x21, 0b111111001);
+    write_port(0xA1, 0b111111110);
+
+    // write_port(0x21, 0xff);
+    // write_port(0xA1, 0xff);
 
     __asm__ volatile("lidt %0"
                      :
                      : "m"(idtp));
     __asm__ volatile("sti");
-
-    write_port(0x21, 0xFD);
 }
