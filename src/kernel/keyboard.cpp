@@ -87,8 +87,6 @@ void keyboard_interrupt()
         0, /* All other keys are undefined */
     };
 
-    write_port(0x20, 0x20);
-
     uint8 status = read_port(0x64);
 
     if (status & 0x01)
@@ -116,6 +114,4 @@ void keyboard_interrupt()
             }
         }
     }
-
-    __asm__ volatile("sti");
 }

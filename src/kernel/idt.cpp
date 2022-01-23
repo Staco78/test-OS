@@ -4,8 +4,23 @@
 #include "exceptions.h"
 #include "terminal.h"
 #include "clock.h"
+#include "processes.h"
 
 extern void keyboard_interrupt(void);
+extern "C" void _irq_1();
+extern "C" void _irq_8();
+
+extern "C" void irq_handler_1()
+{
+    keyboard_interrupt();
+}
+
+extern "C" void irq_handler_8(InterruptRegisters regs)
+{
+    print("clock\n");
+    write_port(0x70, 0x0C);
+    read_port(0x71);
+}
 
 static
     __attribute__((aligned(0x1000)))
@@ -76,31 +91,21 @@ void idt_assemble()
     idt_set_descriptor(30, (uint32)exception_handler);
     idt_set_descriptor(31, (uint32)exception_handler);
 
-    idt_set_descriptor(0x21, (uint32)keyboard_interrupt);
-    idt_set_descriptor(0x28, (uint32)Clock::interrupt);
+    idt_set_descriptor(0x21, (uint32)_irq_1);
+    idt_set_descriptor(0x28, (uint32)_irq_8);
 
     idt_set_descriptor(0x80, (uint32)syscall);
 
+
+    // configure PIC
     write_port(0x20, 0x11);
     write_port(0xA0, 0x11);
-
-    /* ICW2 - remap offset address of IDT */
-    /*
-	* In x86 protected mode, we have to remap the PICs beyond 0x20 because
-	* Intel have designated the first 32 interrupts as "reserved" for cpu exceptions
-	*/
     write_port(0x21, 0x20);
     write_port(0xA1, 0x28);
-
     write_port(0x21, 0x04);
     write_port(0xA1, 0x02);
-
-    /* ICW4 - environment info */
     write_port(0x21, 0x01);
     write_port(0xA1, 0x01);
-    /* Initialization finished */
-
-    /* ICW3 - setup cascading */
     write_port(0x21, 0x00);
     write_port(0xA1, 0x00);
 
@@ -108,8 +113,6 @@ void idt_assemble()
     write_port(0x21, 0b111111001);
     write_port(0xA1, 0b111111110);
 
-    // write_port(0x21, 0xff);
-    // write_port(0xA1, 0xff);
 
     __asm__ volatile("lidt %0"
                      :
