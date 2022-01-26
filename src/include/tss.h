@@ -55,7 +55,7 @@ void write_tss(uint32 gdtAddress)
 
     tss_entry->ss0 = 0x10;
     tss_entry->esp0 = 0xC0090000;
-    tss_entry->cr3 = 0xC0200000;
+    tss_entry->cr3 = 0x100000;
 
     tss_entry->cs = 0x08 | 3;
     tss_entry->ss = tss_entry->ds = tss_entry->es = tss_entry->fs = tss_entry->gs = (8 * 2) | 3;

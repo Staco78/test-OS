@@ -54,6 +54,33 @@ namespace Memory
             kernel_paging_tables[virtualAddress / 4096] = (uint32 *)((physicalAddress & 0xFFFFF000) | 3);
         }
 
+        uint32 kernel_get_free_page()
+        {
+            uint32 free_table = 0; // impossible value
+            for (int i = 770; i < 1024; i++)
+            {
+                uint32 *table = (uint32 *)(((uint32)kernel_paging_directory[i] & 0xFFFFF000) + 0xC0000000);
+                if ((uint32)table == 0)
+                {
+                    free_table = i;
+                    continue;
+                }
+
+                for (int j = 0; j < 1024; j++)
+                {
+                    uint32 page = table[j];
+                    if (page == 0)
+                        return (i * 1024 + j) * 4096;
+                }
+            }
+
+            if (free_table == 0)
+                panic("Kernel get free page: not enought memory");
+
+            kernel_createPagingTable(free_table);
+            return free_table * 1024 * 4096;
+        }
+
         void kernel_unmap_page(uint32 virtualAddress)
         {
             kernel_paging_tables[virtualAddress / 4096] = 0;
@@ -78,9 +105,9 @@ namespace Memory
 
         void createPagingTable(Directory *directory, uint32 index)
         {
-            print("createPaginTable ");
-            printInt(index);
-            printLn();
+            // print("createPaginTable ");
+            // printInt(index);
+            // printLn();
             uint32 physicalAddress = Physical::get_free_pages(1);
             directory->tablesPhysical[index] = physicalAddress | 7;
             directory->tables[index] = (index + 2) * 4096;
@@ -89,7 +116,7 @@ namespace Memory
 
         void map_page(Directory *directory, uint32 virtualAddress, uint32 physicalAddress)
         {
-            print("map page\n");
+            // print("map page\n");
             if (virtualAddress % 4096 != 0)
             {
                 printLn();

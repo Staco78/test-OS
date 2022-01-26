@@ -9,15 +9,16 @@
 extern void keyboard_interrupt(void);
 extern "C" void _irq_1();
 extern "C" void _irq_8();
+extern "C" void _isr_syscall();
 
 extern "C" void irq_handler_1()
 {
     keyboard_interrupt();
 }
 
-extern "C" void irq_handler_8(InterruptRegisters regs)
+extern "C" void irq_handler_8(Registers regs)
 {
-    print("clock\n");
+    Scheduler::schedule(&regs);
     write_port(0x70, 0x0C);
     read_port(0x71);
 }
@@ -44,11 +45,11 @@ void idt_set_descriptor(uint8 vector, uint32 isr)
     descriptor->reserved = 0;
 }
 
-extern "C" void syscall();
-
-extern "C" void syscall_c()
+extern "C" void syscall(Registers regs)
 {
-    print("user\n");
+    // print("user\n");
+    printInt(regs.eax);
+    printChar(' ');
 }
 
 void idt_assemble()
@@ -94,8 +95,7 @@ void idt_assemble()
     idt_set_descriptor(0x21, (uint32)_irq_1);
     idt_set_descriptor(0x28, (uint32)_irq_8);
 
-    idt_set_descriptor(0x80, (uint32)syscall);
-
+    idt_set_descriptor(0x80, (uint32)_isr_syscall);
 
     // configure PIC
     write_port(0x20, 0x11);
@@ -113,9 +113,13 @@ void idt_assemble()
     write_port(0x21, 0b111111001);
     write_port(0xA1, 0b111111110);
 
-
     __asm__ volatile("lidt %0"
                      :
                      : "m"(idtp));
     __asm__ volatile("sti");
+}
+
+extern "C" void print_c()
+{
+    print("slt\n");
 }

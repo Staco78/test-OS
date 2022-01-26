@@ -37,6 +37,8 @@ namespace Memory
         // remap 4 Kio from physicalAddress to virtualAddress
         void kernel_map_page(uint32 virtualAddress, uint32 physicalAddress);
 
+        uint32 kernel_get_free_page();
+
         // copy kernel paging directory to an other
         void copy_kernel_pages(Directory *to);
 
@@ -46,7 +48,6 @@ namespace Memory
         void alloc_pages(Directory *directory, uint32 count, uint32 virtualAddress);
 
         void create_directory(Directory *directory);
-
 
     } // namespace Pages
 

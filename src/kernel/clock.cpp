@@ -25,16 +25,4 @@ namespace Clock
         write_port(0x70, 0x0C);
         read_port(0x71);
     }
-
-    void interrupt()
-    {
-        print("clock\n");
-        write_port(0x70, 0x0C);
-        read_port(0x71);
-
-        write_port(0xA0, 0x20);
-        write_port(0x20, 0x20);
-
-        __asm__ volatile("sti");
-    }
 } // namespace Clock

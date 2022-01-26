@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 #include "memory.h"
+#include "idt.h"
 
 struct ElfHeader
 {
@@ -64,26 +65,42 @@ typedef uint32 ProcessId;
 
 struct Registers
 {
-    uint32 eax;
-    uint32 ebx;
-    uint32 ecx;
-    uint32 edx;
-    uint32 esi;
-    uint32 edi;
-
-    uint32 esp;
-    uint32 ebp;
-
-    uint32 eip;
-
-    uint32 eflags;
-};
+    uint32 edi, esi, ebp, esp, ebx, edx, ecx, eax;
+    uint32 eip, cs, eflags, useresp, ss;
+} __attribute__((packed));
 
 struct Process
 {
     ProcessId id;
     Memory::Pages::Directory pagingDirectory;
     Registers regs;
+    bool started = false;
+    uint32 entry;
 };
 
 void create_process(const char *name);
+
+class ProcessesQueue
+{
+public:
+    ProcessesQueue();
+    Process *pop();
+    Process *first();
+    void push(Process *process);
+    uint32 getSize();
+
+private:
+    uint32 m_size = 0;
+    uint32 m_data;
+    uint32 m_maxData;
+    uint32 m_pushIndex;
+    uint32 m_popIndex;
+};
+
+namespace Scheduler
+{
+    void init();
+    void schedule(Registers *regs);
+    void add(Process *process);
+    void setCurrent(Process *process);
+} // namespace Scheduler

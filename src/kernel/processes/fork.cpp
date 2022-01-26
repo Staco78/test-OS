@@ -65,17 +65,16 @@ void load_process(Process *process, const char *path)
         // TODO: fill padding with 0
     }
 
-    process->regs.eip = header.programEntry;
+    process->entry = header.programEntry;
 
     Memory::KernelAlloc::kfree(buff);
 }
 
-extern "C" void jump_userMode(uint32 addr, uint32 esp, uint32 ebp);
-
 void create_process(const char *path)
 {
-
+    __asm__("mov %0, %%cr3" ::"r"(0x100000)); // TODO remove this
     Process *process = (Process *)Memory::KernelAlloc::kmalloc(sizeof(Process));
+    memset(process, 0, sizeof(Process));
     process->id = 0;
     Memory::Pages::create_directory(&process->pagingDirectory);
     Memory::Pages::copy_kernel_pages(&process->pagingDirectory);
@@ -87,6 +86,7 @@ void create_process(const char *path)
     Memory::Pages::alloc_pages(&process->pagingDirectory, 1, 0x501000);
     process->regs.esp = 0x501000;
     process->regs.ebp = 0x502000;
+    process->regs.useresp = 0x501000;
 
-    jump_userMode(process->regs.eip, process->regs.esp, process->regs.ebp);
+    Scheduler::add(process);
 }

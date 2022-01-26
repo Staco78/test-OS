@@ -33,11 +33,4 @@ typedef struct
 	uint32 base;
 } __attribute__((packed)) idtr_t;
 
-struct InterruptRegisters
-{
-	uint32 gs, fs, es, ds;
-	uint32 edi, esi, sbp, esp, ebx, edx, ecx, eax;
-	uint32 eip, cs, eflags, useresp, ss;
-} __attribute__((packed));
-
 void idt_assemble();
