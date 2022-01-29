@@ -22,17 +22,46 @@ namespace Memory
     namespace Pages
     {
 
+        struct DirectoryEntry
+        {
+            uint32 present : 1;
+            uint32 write : 1;
+            uint32 user : 1;
+            uint32 write_through : 1;
+            uint32 cache_disable : 1;
+            uint32 accessed : 1;
+            uint32 reserved : 1;
+            uint32 page_size : 1;
+            uint32 global : 1;
+            uint32 available : 3;
+            uint32 address : 20;
+        } __attribute__((packed));
+
+        struct TableEntry
+        {
+            uint32 present : 1;
+            uint32 write : 1;
+            uint32 user : 1;
+            uint32 write_through : 1;
+            uint32 cache_disable : 1;
+            uint32 accessed : 1;
+            uint32 dirty : 1;
+            uint32 attribute : 1;
+            uint32 global : 1;
+            uint32 available : 3;
+            uint32 address : 20;
+        } __attribute__((packed));
+
         struct Directory
         {
             uint32 physicalAddress;
-            uint32 virtualTablesPhysicalAddress;
-            uint32 *tablesPhysical;
-            uint32 *tables;
+            DirectoryEntry *tablesPhysical;
+            TableEntry *tablesAddress;
         };
 
         void init();
 
-        void kernel_map_table(uint16 tableIndex, uint32 virtualAddress);
+        void kernel_map_table(uint32 physicalAddress, uint32 virtualAddress);
 
         // remap 4 Kio from physicalAddress to virtualAddress
         void kernel_map_page(uint32 virtualAddress, uint32 physicalAddress);

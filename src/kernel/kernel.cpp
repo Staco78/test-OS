@@ -6,6 +6,7 @@
 #include "processes.h"
 #include "clock.h"
 #include "panic.h"
+#include "debug.h"
 
 void main(uint32 gdtAddress)
 {
@@ -17,7 +18,6 @@ void main(uint32 gdtAddress)
     Scheduler::init();
     Clock::init();
 
-    // __asm__ volatile("xchgw %bx, %bx");
 
     create_process("/program");
     create_process("/program1");

@@ -1,12 +1,14 @@
 #include "memory.h"
 #include "panic.h"
 #include "terminal.h"
+#include "debug.h"
 
 namespace Memory
 {
     namespace KernelAlloc
     {
 #define HEAP_SIZE 4194304 // 4 Mio
+                          // #define HEAP_SIZE 4096
 
         struct allocated_header
         {
@@ -21,8 +23,8 @@ namespace Memory
 
         void init()
         {
-            uint32 address = Physical::get_free_pages_aligned(1024, 4096 * 1024);
-            Pages::kernel_map_table(address / (4096 * 1024), address + 0xC0000000);
+            uint32 address = Physical::get_free_pages_aligned(1024, 4096 * 1024);;
+            Pages::kernel_map_table(address, address + 0xC0000000);
 
             heap_head = (allocated_header *)(address + 0xC0000000);
             heap_head->isFree = 1;
@@ -32,6 +34,10 @@ namespace Memory
 
         void *kmalloc(uint32 size)
         {
+            // print("kmalloc ");
+            // printInt(size);
+            // printLn();
+
             //find free node
             allocated_header *current = heap_head;
             while (current != 0)
