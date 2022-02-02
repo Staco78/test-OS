@@ -16,9 +16,9 @@ extern "C" void irq_handler_1()
     keyboard_interrupt();
 }
 
-extern "C" void irq_handler_8(Registers regs)
+extern "C" void irq_handler_8(Registers *regs)
 {
-    Scheduler::schedule(&regs);
+    Scheduler::schedule(regs);
     write_port(0x70, 0x0C);
     read_port(0x71);
 }
@@ -45,10 +45,10 @@ void idt_set_descriptor(uint8 vector, uint32 isr)
     descriptor->reserved = 0;
 }
 
-extern "C" void syscall(Registers regs)
+extern "C" void syscall(Registers *regs)
 {
     // print("user\n");
-    printInt(regs.eax);
+    printInt(regs->eax);
     printChar(' ');
 }
 

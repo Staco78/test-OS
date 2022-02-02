@@ -52,6 +52,17 @@ namespace Memory
             uint32 address : 20;
         } __attribute__((packed));
 
+        enum class Flags
+        {
+            write = 2,
+            user = 4,
+            write_through = 8,
+            cache_disable = 16,
+            global = 256,
+
+            user_write = 6
+        };
+
         struct Directory
         {
             uint32 physicalAddress;
@@ -60,13 +71,13 @@ namespace Memory
         };
 
         void init();
-        void createTable(uint16 index, bool user);
-        void mapPage(uint32 virtualAddress, uint32 physicalAddress, bool user);
+        void createTable(uint16 index, uint32 flags);
+        void mapPage(uint32 virtualAddress, uint32 physicalAddress, uint32 flags);
         void unmapPage(uint32 virtualAddress);
         uint32 getKernelFreePage();
         uint16 getKernelFreeTable();
-        void allocPages(uint32 count, uint32 virtualAddress);
-        void switchDirectory(Directory* newDirectory);
+        void allocPages(uint32 count, uint32 virtualAddress, uint32 flags);
+        void switchDirectory(Directory *newDirectory);
         void createDirectory(Directory *directory);
 
     } // namespace Pages

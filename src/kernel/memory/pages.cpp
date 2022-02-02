@@ -4,9 +4,9 @@
 #include "debug.h"
 #include "lib/memoryUtils.h"
 
-#define KERNEL_DIRECTORY_ADDRESS 0x100000
-#define KERNEL_VIRTUAL_DIRECTORY_ADDRESS 0xC0100000
-#define KERNEL_VIRTUAL_TABLES_ADDRESS 0xC0800000
+#define DIRECTORY_ADDRESS 0x100000
+#define VIRTUAL_DIRECTORY_ADDRESS 0xC0800000
+#define VIRTUAL_TABLES_ADDRESS 0xC0400000
 
 #define SHIFT(addr) (addr >> 12)
 #define UNSHIFT(addr) (addr << 12)
@@ -21,26 +21,25 @@ namespace Memory
 
         void init()
         {
-            kernel_directory.physicalAddress = KERNEL_DIRECTORY_ADDRESS;
-            kernel_directory.entries = (DirectoryEntry *)KERNEL_VIRTUAL_DIRECTORY_ADDRESS;
-            kernel_directory.tables = (TableEntry *)KERNEL_VIRTUAL_TABLES_ADDRESS;
+            kernel_directory.physicalAddress = DIRECTORY_ADDRESS;
+            kernel_directory.entries = (DirectoryEntry *)VIRTUAL_DIRECTORY_ADDRESS;
+            kernel_directory.tables = (TableEntry *)VIRTUAL_TABLES_ADDRESS;
 
             current_directory = &kernel_directory;
         }
 
-        void createTable(uint16 index, bool user)
+        void createTable(uint16 index, uint32 flags)
         {
             ASSERT(index >= 0 && index < 1024);
 
             uint32 physicalAddress = Physical::get_free_pages(1);
             current_directory->entries[index].address = SHIFT(physicalAddress);
-            current_directory->entries[index].write = 1;
-            current_directory->entries[index].user = (uint32)user;
-            mapPage(((uint32)current_directory->tables + index * 4096), physicalAddress, user);
+            ((uint32 *)current_directory->entries)[index] |= flags;
+            mapPage(((uint32)current_directory->tables + index * 4096), physicalAddress, (flags | (uint32)Flags::write) & ~(uint32)Flags::user);
             current_directory->entries[index].present = 1;
         }
 
-        void mapPage(uint32 virtualAddress, uint32 physicalAddress, bool user)
+        void mapPage(uint32 virtualAddress, uint32 physicalAddress, uint32 flags)
         {
             ASSERT((virtualAddress & 0xFFFFF000) == virtualAddress);   // check if aligned
             ASSERT((physicalAddress & 0xFFFFF000) == physicalAddress); // check if aligned
@@ -48,11 +47,10 @@ namespace Memory
             uint32 index = virtualAddress / 4096;
 
             if (current_directory->entries[index / 1024].present == 0) // check if table is present
-                createTable(index / 1024, user);
+                createTable(index / 1024, flags);
 
             current_directory->tables[index].address = SHIFT(physicalAddress);
-            current_directory->tables[index].write = 1;
-            current_directory->tables[index].user = (uint32)user;
+            ((uint32 *)current_directory->tables)[index] |= flags;
             current_directory->tables[index].present = 1;
         }
 
@@ -99,11 +97,11 @@ namespace Memory
             return 0; // not reached
         }
 
-        void allocPages(uint32 count, uint32 virtualAddress)
+        void allocPages(uint32 count, uint32 virtualAddress, uint32 flags)
         {
             for (uint32 i = 0; i < count; i++)
             {
-                mapPage(virtualAddress, Physical::get_free_pages(1), true);
+                mapPage(virtualAddress, Physical::get_free_pages(1), flags);
                 virtualAddress += 4096;
             }
         }
@@ -129,28 +127,6 @@ namespace Memory
             uint32 tableVirtualAddress = getKernelFreePage();
             mapPage(tableVirtualAddress, tablePhysicalAddress, false);
 
-            //recursive maping
-            {
-                directory->entries[767].address = SHIFT(tablePhysicalAddress);
-                directory->entries[767].write = 1;
-                directory->entries[767].present = 1;
-
-                ((TableEntry *)tableVirtualAddress)[767].address = SHIFT(tablePhysicalAddress);
-                ((TableEntry *)tableVirtualAddress)[767].write = 1;
-                ((TableEntry *)tableVirtualAddress)[767].present = 1;
-            }
-
-            directory->tables = (TableEntry *)0xBFC00000;
-
-            uint32 tableForDirectoryPhysicalAddress = Physical::get_free_pages(1);
-            uint32 tableForDirectoryVirtualAddress = getKernelFreePage();
-            mapPage(tableForDirectoryVirtualAddress, tableForDirectoryPhysicalAddress, false);
-
-            directory->entries[766].address = SHIFT(tableForDirectoryPhysicalAddress);
-            directory->entries[766].write = 1;
-            directory->entries[766].user = 1;
-            directory->entries[766].present = 1;
-
             //kernel maping
             for (int i = 768; i < 1024; i++)
             {
@@ -163,18 +139,43 @@ namespace Memory
                 }
             }
 
-            ((TableEntry *)tableForDirectoryVirtualAddress)[1023].address = SHIFT(addressPhysical);
-            ((TableEntry *)tableForDirectoryVirtualAddress)[1023].write = 1;
-            ((TableEntry *)tableForDirectoryVirtualAddress)[1023].present = 1;
+            //recursive maping
+            {
+                directory->entries[769].address = SHIFT(tablePhysicalAddress);
+                directory->entries[769].write = 1;
+                directory->entries[769].present = 1;
 
-            ((TableEntry *)tableVirtualAddress)[766].address = SHIFT(tableForDirectoryPhysicalAddress);
-            ((TableEntry *)tableVirtualAddress)[766].write = 1;
-            ((TableEntry *)tableVirtualAddress)[766].present = 1;
+                ((TableEntry *)tableVirtualAddress)[769].address = SHIFT(tablePhysicalAddress);
+                ((TableEntry *)tableVirtualAddress)[769].write = 1;
+                ((TableEntry *)tableVirtualAddress)[769].present = 1;
+            }
 
-            directory->entries = (DirectoryEntry *)0xBFBFF000;
+            directory->tables = (TableEntry *)VIRTUAL_TABLES_ADDRESS;
+
+            uint32 tableForDirectoryPhysicalAddress = Physical::get_free_pages(1);
+            uint32 tableForDirectoryVirtualAddress = getKernelFreePage();
+            mapPage(tableForDirectoryVirtualAddress, tableForDirectoryPhysicalAddress, false);
+
+            directory->entries[770].address = SHIFT(tableForDirectoryPhysicalAddress);
+            directory->entries[770].write = 1;
+            directory->entries[770].user = 1;
+            directory->entries[770].present = 1;
+
+            memcpy((void *)tableForDirectoryVirtualAddress, &kernel_directory.tables[1024 * 770], 4096);
+
+            ((TableEntry *)tableForDirectoryVirtualAddress)[0].address = SHIFT(addressPhysical);
+            ((TableEntry *)tableForDirectoryVirtualAddress)[0].write = 1;
+            ((TableEntry *)tableForDirectoryVirtualAddress)[0].present = 1;
+
+            ((TableEntry *)tableVirtualAddress)[770].address = SHIFT(tableForDirectoryPhysicalAddress);
+            ((TableEntry *)tableVirtualAddress)[770].write = 1;
+            ((TableEntry *)tableVirtualAddress)[770].present = 1;
+
+            directory->entries = (DirectoryEntry *)VIRTUAL_DIRECTORY_ADDRESS;
 
             unmapPage(addressVirtual);
             unmapPage(tableVirtualAddress);
+            unmapPage(tableForDirectoryVirtualAddress);
         }
 
     } // namespace Pages

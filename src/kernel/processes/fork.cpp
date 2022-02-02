@@ -60,7 +60,7 @@ void load_process(Process *process, const char *path)
         if (programs[i].type != (uint32)ElfSegmentType::load)
             continue;
 
-        Memory::Pages::allocPages(programs[i].sizeInMem / 4096 + (programs[i].sizeInMem % 4096 == 0 ? 0 : 1), programs[i].virtualAddress);
+        Memory::Pages::allocPages(programs[i].sizeInMem / 4096 + (programs[i].sizeInMem % 4096 == 0 ? 0 : 1), programs[i].virtualAddress, (uint32)Memory::Pages::Flags::user_write);
         Fs::readInodeData(&fileInode, (void *)programs[i].virtualAddress, programs[i].offset, programs[i].sizeInFile);
 
         // TODO: fill padding with 0
@@ -82,7 +82,7 @@ void create_process(const char *path)
 
     load_process(process, path);
 
-    Memory::Pages::allocPages(1, 0x501000);
+    Memory::Pages::allocPages(1, 0x501000, (uint32)Memory::Pages::Flags::user_write);
     process->regs.esp = 0x501000;
     process->regs.ebp = 0x502000;
     process->regs.useresp = 0x501000;

@@ -5,5 +5,5 @@
 - 0x00106000-0x00125fff: memory bitmap
 
 ## virtual:
-- 0xC0100000-0xC0100fff: kernel paging directory
-- 0xC0101000-0xC0500fff: kernel paging tables
+- 0xC0400000-0xC07fffff: paging directory
+- 0xC0800000-0xC0800fff: paging tables
