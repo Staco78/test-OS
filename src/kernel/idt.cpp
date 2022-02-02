@@ -118,8 +118,3 @@ void idt_assemble()
                      : "m"(idtp));
     __asm__ volatile("sti");
 }
-
-extern "C" void print_c()
-{
-    print("slt\n");
-}

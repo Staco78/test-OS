@@ -19,8 +19,7 @@ namespace Scheduler
             print("Not current process, schedule ignored\n");
             return;
         }
-        // print("schedule\n");
-        // current->regs = *regs;
+
         memcpy(&current->regs, regs, sizeof(Registers));
 
         queue.push(current);
@@ -28,10 +27,7 @@ namespace Scheduler
 
         memcpy(regs, &current->regs, sizeof(Registers));
 
-        __asm__("mov %0, %%cr3" ::"r"(current->pagingDirectory.physicalAddress));
-
-        // printHex(regs->eip);
-        // printLn();
+        Memory::Pages::switchDirectory(&current->pagingDirectory);
 
         if (!current->started)
         {

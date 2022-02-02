@@ -55,28 +55,19 @@ namespace Memory
         struct Directory
         {
             uint32 physicalAddress;
-            DirectoryEntry *tablesPhysical;
-            TableEntry *tablesAddress;
+            DirectoryEntry *entries;
+            TableEntry *tables;
         };
 
         void init();
-
-        void kernel_map_table(uint32 physicalAddress, uint32 virtualAddress);
-
-        // remap 4 Kio from physicalAddress to virtualAddress
-        void kernel_map_page(uint32 virtualAddress, uint32 physicalAddress);
-
-        uint32 kernel_get_free_page();
-
-        // copy kernel paging directory to an other
-        void copy_kernel_pages(Directory *to);
-
-        // remap 4 Kio from physicalAddress to virtualAddress
-        void map_page(Directory *directory, uint32 virtualAddress, uint32 physicalAddress);
-
-        void alloc_pages(Directory *directory, uint32 count, uint32 virtualAddress);
-
-        void create_directory(Directory *directory);
+        void createTable(uint16 index, bool user);
+        void mapPage(uint32 virtualAddress, uint32 physicalAddress, bool user);
+        void unmapPage(uint32 virtualAddress);
+        uint32 getKernelFreePage();
+        uint16 getKernelFreeTable();
+        void allocPages(uint32 count, uint32 virtualAddress);
+        void switchDirectory(Directory* newDirectory);
+        void createDirectory(Directory *directory);
 
     } // namespace Pages
 

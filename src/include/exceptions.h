@@ -13,5 +13,5 @@ void _9();
 void _10();
 void _11();
 void _12();
-void _13();
+void _13(uint32 e);
 void _14(uint32 e);

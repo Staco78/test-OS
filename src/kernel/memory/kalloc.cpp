@@ -7,7 +7,7 @@ namespace Memory
 {
     namespace KernelAlloc
     {
-#define HEAP_SIZE 4194304 // 4 Mio
+#define HEAP_SIZE 4194304 // 4 Mio \
                           // #define HEAP_SIZE 4096
 
         struct allocated_header
@@ -23,10 +23,17 @@ namespace Memory
 
         void init()
         {
-            uint32 address = Physical::get_free_pages_aligned(1024, 4096 * 1024);;
-            Pages::kernel_map_table(address, address + 0xC0000000);
+            uint32 physicalAddress = Physical::get_free_pages_aligned(1024, 4096 * 1024);
+            uint16 table = Pages::getKernelFreeTable();
+            uint32 virtualAddress = table * 1024 * 4096;
+            Pages::createTable(table, false);
 
-            heap_head = (allocated_header *)(address + 0xC0000000);
+            for (int i = 0; i < 1024; i++)
+            {
+                Pages::mapPage(virtualAddress + i * 4096, physicalAddress + i * 4096, false);
+            }
+
+            heap_head = (allocated_header *)(virtualAddress);
             heap_head->isFree = 1;
             heap_head->next = 0;
             heap_head->size = HEAP_SIZE;
@@ -34,10 +41,6 @@ namespace Memory
 
         void *kmalloc(uint32 size)
         {
-            // print("kmalloc ");
-            // printInt(size);
-            // printLn();
-
             //find free node
             allocated_header *current = heap_head;
             while (current != 0)
@@ -51,11 +54,6 @@ namespace Memory
             panic("kmalloc: Out of memory");
 
         found:
-            // print("alloc ");
-            // printInt(size);
-            // print("B at ");
-            // printHex(((uint32)current + sizeof(allocated_header)));
-            // printLn();
             if (current->size - size <= sizeof(allocated_header) + 1)
             {
                 current->isFree = 0;
@@ -90,9 +88,6 @@ namespace Memory
             panic("kfree: Unable to free: not found");
 
         found:
-            // print("free ");
-            // printInt(current->size);
-            // print("B\n");
             current->isFree = 1;
 
             if ((uint32)current->next == 0)

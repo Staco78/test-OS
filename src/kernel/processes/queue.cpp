@@ -6,8 +6,8 @@
 ProcessesQueue::ProcessesQueue()
 {
     uint32 address = Memory::Physical::get_free_pages(1);
-    m_data = Memory::Pages::kernel_get_free_page();
-    Memory::Pages::kernel_map_page(m_data, address);
+    m_data = Memory::Pages::getKernelFreePage();
+    Memory::Pages::mapPage(m_data, address, false);
     m_maxData = m_data + 4096;
 
     m_popIndex = m_data;

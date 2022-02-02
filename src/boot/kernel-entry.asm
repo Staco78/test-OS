@@ -5,7 +5,8 @@
 DIRECTORY_ADDRESS equ 0x100000
 TABLE_ADDRESS_0 equ 0x102000
 TABLE_ADDRESS_768 equ 0x103000
-TABLE_ADDRESS_769 equ 0x104000
+; TABLE_ADDRESS_769 equ 0x104000
+TABLE_ADDRESS_770 equ 0x105000
 
 ; clear directory
 mov eax, DIRECTORY_ADDRESS
@@ -36,31 +37,19 @@ cmp eax, TABLE_ADDRESS_768 + 4096
 jl loop_table_768
 
 
-; map table 769 to 0xC0400000 ==> 0x00400000
-mov eax, TABLE_ADDRESS_769
-mov ebx, 0x400003
-loop_table_769:
-mov long [eax], ebx
-add eax, 4
-add ebx, 4096
-cmp eax, TABLE_ADDRESS_769 + 4096
-jl loop_table_769
+mov long [TABLE_ADDRESS_770 + 768 * 4], TABLE_ADDRESS_768 | 3 
+mov long [TABLE_ADDRESS_770 + 770 * 4], TABLE_ADDRESS_770 | 3 
 
 
-mov long [DIRECTORY_ADDRESS], TABLE_ADDRESS_0  ; put tables addresses into directory
-or long [DIRECTORY_ADDRESS], 7
-mov long [DIRECTORY_ADDRESS + 768 * 4], TABLE_ADDRESS_768
-or long [DIRECTORY_ADDRESS + 768 * 4], 3
-mov long [DIRECTORY_ADDRESS + 769 * 4], TABLE_ADDRESS_769
-or long [DIRECTORY_ADDRESS + 769 * 4], 3
-
+mov long [DIRECTORY_ADDRESS], TABLE_ADDRESS_0 | 3  ; put tables addresses into directory
+mov long [DIRECTORY_ADDRESS + 768 * 4], TABLE_ADDRESS_768 | 3
+mov long [DIRECTORY_ADDRESS + 770 * 4], TABLE_ADDRESS_770 | 3
 
 mov eax, DIRECTORY_ADDRESS ; active pagination
 mov cr3, eax
 mov eax, cr0
 or eax, 0x80000000
 mov cr0, eax
-
 
 
 jmp (up + 0xC0000000)

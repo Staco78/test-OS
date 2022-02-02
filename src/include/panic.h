@@ -1,15 +1,18 @@
 #pragma once
+#include "terminal.h"
 
-#define panic(str)               \
-    {                            \
-        print("Kernel panic: "); \
-        print(str);              \
-        printLn();               \
-        print(__FILE__);         \
-        printChar(' ');          \
-        printInt(__LINE__);      \
-        __asm__ volatile("cli"); \
-        while (1)                \
-        {                        \
-        }                        \
+static void _panic(const char *str, const char *file, uint32 line)
+{
+    print("Kernel panic: ");
+    print(str);
+    printLn();
+    print(file);
+    printChar(' ');
+    printInt(line);
+    __asm__ volatile("cli");
+    while (1)
+    {
     }
+}
+
+#define panic(str) _panic(str, __FILE__, __LINE__);

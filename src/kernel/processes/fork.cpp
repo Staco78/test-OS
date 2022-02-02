@@ -3,6 +3,7 @@
 #include "fs.h"
 #include "terminal.h"
 #include "lib/memoryUtils.h"
+#include "debug.h"
 
 void load_process(Process *process, const char *path)
 {
@@ -59,7 +60,7 @@ void load_process(Process *process, const char *path)
         if (programs[i].type != (uint32)ElfSegmentType::load)
             continue;
 
-        Memory::Pages::alloc_pages(&process->pagingDirectory, programs[i].sizeInMem / 4096 + (programs[i].sizeInMem % 4096 == 0 ? 0 : 1), programs[i].virtualAddress);
+        Memory::Pages::allocPages(programs[i].sizeInMem / 4096 + (programs[i].sizeInMem % 4096 == 0 ? 0 : 1), programs[i].virtualAddress);
         Fs::readInodeData(&fileInode, (void *)programs[i].virtualAddress, programs[i].offset, programs[i].sizeInFile);
 
         // TODO: fill padding with 0
@@ -72,18 +73,16 @@ void load_process(Process *process, const char *path)
 
 void create_process(const char *path)
 {
-    __asm__("mov %0, %%cr3" ::"r"(0x100000)); // TODO remove this
     Process *process = (Process *)Memory::KernelAlloc::kmalloc(sizeof(Process));
     memset(process, 0, sizeof(Process));
     process->id = 0;
-    Memory::Pages::create_directory(&process->pagingDirectory);
-    Memory::Pages::copy_kernel_pages(&process->pagingDirectory);
 
-    __asm__("mov %0, %%cr3" ::"r"(process->pagingDirectory.physicalAddress));
+    Memory::Pages::createDirectory(&process->pagingDirectory);
+    Memory::Pages::switchDirectory(&process->pagingDirectory);
 
     load_process(process, path);
 
-    Memory::Pages::alloc_pages(&process->pagingDirectory, 1, 0x501000);
+    Memory::Pages::allocPages(1, 0x501000);
     process->regs.esp = 0x501000;
     process->regs.ebp = 0x502000;
     process->regs.useresp = 0x501000;

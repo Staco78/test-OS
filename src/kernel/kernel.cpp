@@ -16,9 +16,8 @@ void main(uint32 gdtAddress)
     Fs::init();
     write_tss(gdtAddress);
     Scheduler::init();
-    Clock::init();
-
 
     create_process("/program");
     create_process("/program1");
+    Clock::init();
 }

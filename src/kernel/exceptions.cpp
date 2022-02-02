@@ -56,8 +56,36 @@ void _12()
 {
     panic("Stack-Segment Fault");
 }
-void _13()
+void _13(uint32 e)
 {
+    if (e & 1)
+
+        print("external ");
+
+    else
+        print("internal ");
+    uint8 tbl = ((uint8)(e >> 1)) & 0b11;
+    if (tbl == 0)
+
+        print("GTD ");
+
+    else if (tbl == 1 || tbl == 3)
+
+        print("IDT ");
+
+    else if (tbl == 2)
+
+        print("LDT ");
+
+    else
+    {
+        print("Invalid tbl value (");
+        printInt(tbl);
+        print(") ");
+    }
+    print("Index: ");
+    printInt((uint16)(e >> 3));
+    printLn();
     panic("General Protection Fault");
 }
 void _14(uint32 e)

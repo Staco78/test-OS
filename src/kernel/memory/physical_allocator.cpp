@@ -81,7 +81,7 @@ namespace Memory
 
         void init()
         {
-            memory_bitmap = (uint8 *)0xC0105000;
+            memory_bitmap = (uint8 *)0xC0106000;
             uint8 *ptr = (uint8 *)0xC000F000;
             for (uint8 i = 0; i < 6; i++)
             {
@@ -111,7 +111,7 @@ namespace Memory
                 }
             }
 
-            for (int i = 32; i < 37; i++)
+            for (int i = 0; i < 37; i++)
             {
                 memory_bitmap[i] = 0xFF;
             }
