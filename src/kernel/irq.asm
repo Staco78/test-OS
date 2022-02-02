@@ -2,7 +2,6 @@
 %macro interrupt 3
 global %1
 %1:
-cli
 pusha
 
 mov ax, 0x10
@@ -36,8 +35,6 @@ mov es, ax
 mov fs, ax
 mov gs, ax
 popa
-sti
-nop
 iret
 %endmacro
 

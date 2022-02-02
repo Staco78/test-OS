@@ -8,7 +8,7 @@ namespace Clock
     {
         __asm__ volatile("cli");
 
-        int rate = 15;
+        int rate = 3;
         rate &= 0x0F;
         write_port(0x70, 0x8A);
         uint8 prev = read_port(0x71);

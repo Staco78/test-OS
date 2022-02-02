@@ -16,43 +16,6 @@ void load_process(Process *process, const char *path)
     ElfHeader header;
     memcpy(&header, buff, sizeof(ElfHeader));
 
-    // print("magic: ");
-    // printHex(header.magic);
-    // print(" bits: ");
-    // printInt(header.bits);
-    // print(" endian: ");
-    // printInt(header.endian);
-    // print("\nheader version: ");
-    // printInt(header.elfHeaderVersion);
-    // print(" OS ABI: ");
-    // printInt(header.OS_ABI);
-    // print(" type: ");
-    // printInt(header.type);
-    // print("\narch: ");
-    // printHex(header.architecture);
-    // print(" version: ");
-    // printInt(header.elfVersion);
-    // print(" entry point: ");
-    // printHex(header.programEntry);
-    // print("\nheader table pos: ");
-    // printHex(header.programHeaderTablePosition);
-    // print(" section table pos: ");
-    // printHex(header.sectionHeaderPosition);
-    // print("\nflags: ");
-    // printHex(header.flags);
-    // print(" header size: ");
-    // printHex(header.headerSize);
-    // print(" program header entry size: ");
-    // printHex(header.programHeaderEntrySize);
-    // print("\nprogram header entries: ");
-    // printHex(header.programHeaderEntriesNb);
-    // print(" section header entry size: ");
-    // printHex(header.sectionHeaderEntrySize);
-    // print("\nsection header entries: ");
-    // printHex(header.sectionHeaderEntrySize);
-    // print(" section header index: ");
-    // printInt(header.sectionHeaderIndex);
-
     ElfProgramHeader *programs = (ElfProgramHeader *)Memory::KernelAlloc::kmalloc(sizeof(ElfProgramHeader) * header.programHeaderEntriesNb);
     memcpy(programs, buff + header.programHeaderTablePosition, sizeof(ElfProgramHeader) * header.programHeaderEntriesNb);
     for (int i = 0; i < header.programHeaderEntriesNb; i++)
@@ -86,6 +49,7 @@ void create_process(const char *path)
     process->regs.esp = 0x501000;
     process->regs.ebp = 0x502000;
     process->regs.useresp = 0x501000;
+    process->regs.eflags = 0x200;
 
     Scheduler::add(process);
 }
