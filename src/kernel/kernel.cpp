@@ -7,6 +7,7 @@
 #include "clock.h"
 #include "panic.h"
 #include "debug.h"
+#include "syscalls.h"
 
 void main(uint32 gdtAddress)
 {
@@ -15,6 +16,7 @@ void main(uint32 gdtAddress)
     Memory::init();
     Fs::init();
     write_tss(gdtAddress);
+    Syscalls::init();
     Scheduler::init();
 
     create_process("/program");

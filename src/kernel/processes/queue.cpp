@@ -16,6 +16,7 @@ ProcessesQueue::ProcessesQueue()
 
 void ProcessesQueue::push(Process *process)
 {
+
     if (++m_size > 1024)
         panic("Processes queue: cannot push: full");
 
@@ -29,6 +30,7 @@ void ProcessesQueue::push(Process *process)
 
 Process *ProcessesQueue::pop()
 {
+
     if (m_size-- == 0)
         panic("Processes queue: cannot pop: empty");
 

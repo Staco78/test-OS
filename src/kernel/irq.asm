@@ -1,4 +1,7 @@
 ; %1: name, %2: func to call, %3 irq number (-1 if not)
+
+extern setSchedulerRegs
+
 %macro interrupt 3
 global %1
 %1:
@@ -13,6 +16,8 @@ mov gs, ax
 push esp
 
 cld
+
+call setSchedulerRegs
 
 extern %2
 call %2

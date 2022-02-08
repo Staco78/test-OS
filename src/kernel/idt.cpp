@@ -5,6 +5,9 @@
 #include "terminal.h"
 #include "clock.h"
 #include "processes.h"
+#include "syscalls.h"
+
+#include "errno.h"
 
 extern void keyboard_interrupt(void);
 extern "C" void _irq_1();
@@ -16,9 +19,14 @@ extern "C" void irq_handler_1()
     keyboard_interrupt();
 }
 
+extern "C" void setSchedulerRegs(Registers *regs)
+{
+    Scheduler::return_regs = regs;
+}
+
 extern "C" void irq_handler_8(Registers *regs)
 {
-    Scheduler::schedule(regs);
+    Scheduler::schedule();
     write_port(0x70, 0x0C);
     read_port(0x71);
 }
@@ -47,9 +55,13 @@ void idt_set_descriptor(uint8 vector, uint32 isr)
 
 extern "C" void syscall(Registers *regs)
 {
-    // print("user\n");
-    printInt(regs->eax);
-    printChar(' ');
+    if (regs->eax >= SYSCALLS_COUNT)
+    {
+        regs->eax = -EINVAL;
+        return;
+    }
+    auto func = (int (*)(uint32, uint32, uint32, uint32, uint32))Syscalls::funcs[regs->eax];
+    regs->eax = func(regs->ebx, regs->ecx, regs->edx, regs->esi, regs->edi);
 }
 
 void idt_assemble()

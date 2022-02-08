@@ -99,8 +99,12 @@ private:
 
 namespace Scheduler
 {
+
+    extern Process *current;
+    extern Registers *return_regs;
+
     void init();
-    void schedule(Registers *regs);
+    void schedule();
+    void exit_current();
     void add(Process *process);
-    void setCurrent(Process *process);
 } // namespace Scheduler

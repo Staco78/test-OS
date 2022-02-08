@@ -26,7 +26,8 @@ void load_process(Process *process, const char *path)
         Memory::Pages::allocPages(programs[i].sizeInMem / 4096 + (programs[i].sizeInMem % 4096 == 0 ? 0 : 1), programs[i].virtualAddress, (uint32)Memory::Pages::Flags::user_write);
         Fs::readInodeData(&fileInode, (void *)programs[i].virtualAddress, programs[i].offset, programs[i].sizeInFile);
 
-        // TODO: fill padding with 0
+        if (programs[i].sizeInMem % 4096 > 0)
+            memset((void *)(programs[i].virtualAddress + programs[i].sizeInMem % 4096), 0, 4096 - (programs[i].sizeInMem % 4096));
     }
 
     process->entry = header.programEntry;

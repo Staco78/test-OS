@@ -178,6 +178,41 @@ namespace Memory
             unmapPage(tableForDirectoryVirtualAddress);
         }
 
+        bool isUserPtrValid(uint32 ptr, uint32 size, bool write)
+        {
+            if (ptr == 0)
+                return false;
+            if (ptr >= 0xC0000000)
+                return false;
+
+            uint32 end = ptr ? ptr + (size - 1) : ptr;
+
+            if (end >= 0xC0000000)
+                return false;
+
+            uint32 pageStart = SHIFT(ptr);
+            uint32 pageEnd = SHIFT(end);
+
+            for (uint32 page = pageStart; page <= pageEnd; page++)
+            {
+                uint16 table = page / 1024;
+                if (!current_directory->entries[table].present)
+                    return false;
+                if (!current_directory->entries[table].user)
+                    return false;
+                if (write && !current_directory->entries[table].write)
+                    return false;
+
+                if (!current_directory->tables[page].present)
+                    return false;
+                if (!current_directory->tables[page].user)
+                    return false;
+                if (write && !current_directory->tables[page].write)
+                    return false;
+            }
+            return true;
+        }
+
     } // namespace Pages
 
 } // namespace Memory

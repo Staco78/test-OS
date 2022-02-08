@@ -80,6 +80,9 @@ namespace Memory
         void switchDirectory(Directory *newDirectory);
         void createDirectory(Directory *directory);
 
+
+        bool isUserPtrValid(uint32 ptr, uint32 size, bool write);
+
     } // namespace Pages
 
     namespace KernelAlloc
